@@ -3,8 +3,6 @@ from pathlib import Path
 
 from loguru import logger
 
-from src.service.settings import settings
-
 LOG_DIR = Path(__file__).resolve().parents[2] / "logs"
 
 FORMAT = (
@@ -16,12 +14,7 @@ FORMAT = (
 
 logger.remove()
 
-logger.add(
-    sys.stderr,
-    level=settings.log_level,
-    format=FORMAT,
-    colorize=True,
-)
+logger.add(sys.stderr, level="INFO", format=FORMAT, colorize=True)
 
 logger.add(
     LOG_DIR / "debug.log",
