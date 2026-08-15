@@ -17,8 +17,8 @@ async def start_bot() -> None:
     try:
         await bot.delete_webhook(drop_pending_updates=True)
         logger.info("webhook cleared")
-        logger.info("bot polling started")
         await dp.start_polling(bot)
+        logger.info("bot polling started")
 
     finally:
         await bot.session.close()

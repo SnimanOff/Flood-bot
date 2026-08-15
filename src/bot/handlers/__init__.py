@@ -1,6 +1,6 @@
 from aiogram import Router
 
-from src.bot.handlers.start import router as start_router
+from src.bot.handlers.private.start.cmd import router as start_router
 
 
 def setup_routers() -> Router:
