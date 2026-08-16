@@ -2,8 +2,7 @@ from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 
-from src.bot.handlers.private.start.keyboard import kb_start, kb_shop
-from src.service.vault.goods import get_goods 
+from src.bot.handlers.private.start.keyboard import kb_start
 from src.database.repositories import UserRepository
 from src.service.sendmsg import send_msg
 from src.service.vault.media import START_MEDIA
@@ -17,20 +16,17 @@ async def cmd_start(message: Message, users: UserRepository) -> None:
 
     await send_msg(message=message, text=f"Привет, {message.from_user.first_name}!", media=START_MEDIA, reply_markup=kb_start())
 
-@router.callback_query(F.data.startswith("shop_noop:"), F.chat.type == "private")
-async def clbck_shop_noop(call: CallbackQuery):
+# ---------------- меню ----------------
 
-    _, cur, total = call.data.split(":")
+@router.callback_query(F.data == "start_menu", F.message.chat.type == "private")
+async def clbck_start_menu(callback: CallbackQuery, users: UserRepository) -> None:
+    await users.get_or_create(callback.from_user.id, callback.from_user.username)
 
-    await call.answer(f"Страница {cur} из {total}")
+    text = f"Привет, {callback.from_user.first_name}"
 
-@router.callback_query(F.data.startswith("shop_page:"), F.chat.type == "private")
-async def clbck_shop_page(call: CallbackQuery):
-    page = int(call.data.split(":")[1])
-    
-    await call.message.edit_reply_markup(reply_markup=kb_shop(get_goods(), page))
-    await call.answer()
+    if callback.message.photo:
+        await callback.message.edit_caption(caption=text, reply_markup=kb_start())
+    else:
+        await callback.message.edit_text(text=text, reply_markup=kb_start())
 
-@router.callback_query(F.data == "shop_select:purge_immunity", F.chat.type == "private")
-async def clbck_shop_purge_immunity(call: CallbackQuery):
-    ...
+    await callback.answer()

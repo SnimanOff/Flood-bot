@@ -1,0 +1,34 @@
+﻿ROADMAP — бот внутренней валюты (флуд-чат)
+
+=== Сделано ===
+- Инфра: async SQLAlchemy, User (balance, role, banned_until, last_query_money)
+- Middleware session + UserRepository, MemoryStorage (FSM), throttle
+- /start private меню: магазин, пополнить, награды, поддержка
+- start_menu назад в меню
+- Заявка на средства: КД 24ч, FSM сумма, рассылка OWNER+, кнопки принять/отказать (style success/danger)
+- money_requests: id, user_tg_id, amount, status pending/ok/no, caption, photo_file_id, notifies
+- bal_ok/bal_no по request_id, один раз (двойной accept закрыт)
+- Магазин вынесен в private/shop: пагинация, stubs товаров
+- /gm выдача/списание (OWNER+), ephemeral в группах
+- send_msg + media-заглушки
+
+=== Не сделано / дыры ===
+- OWNER без /start не получит заявку
+- create_all не добавляет новые колонки в старую БД (нужен ALTER/migrate)
+- Покупка товаров, инвентарь, активация наград
+- start_my_items пустой
+- Список товаров от заказчика (мяо) неполный
+
+=== Приоритет (делать по порядку) ===
+P0. Выдать себе ROOT/OWNER в БД, прогнать сценарий: пополнить -> accept -> баланс
+P0. money_requests + bal_ok/bal_no — сделано
+P1. Магазин: title/price в goods.py, покупка (списание + user_items)
+P1. Мои награды: список, статус active/used
+P1. Активация: purge_immunity, rest (+ пинг админам)
+P2. Ждать полный список товаров у заказчика
+P2. Лог операций баланса
+P3. Stars — не MVP
+P3. Прикрепление proof к заявке (форвард/фото) — из переписки опционально
+
+=== Порядок ===
+smoke test -> shop buy -> inventory/activate -> goods from client -> stars

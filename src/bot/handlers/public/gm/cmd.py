@@ -84,5 +84,4 @@ async def cmd_gm(message: Message, command: CommandObject, users: UserRepository
         return
 
     sign = "+" if amount > 0 else ""
-    text = f"Выдано {sign}{amount}\nID: <code>{target.tg_id}</code>\nБаланс: <b>{target.balance}</b>"
-    await send_msg(message, text, media=GM_OK_MEDIA or GM_MEDIA, only_caller=True)
+    await send_msg(message, text=f"Выдано {sign}{amount}\nID: <code>{target.tg_id}</code>\nБаланс: <b>{target.balance}</b>", media=GM_OK_MEDIA or GM_MEDIA, only_caller=True)

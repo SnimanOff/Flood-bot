@@ -1,11 +1,11 @@
-from collections.abc import Awaitable, Callable
+﻿from collections.abc import Awaitable, Callable
 from typing import Any
 
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from src.database.repositories import UserRepository
+from src.database.repositories import MoneyRequestRepository, UserRepository
 
 
 class DbSessionMiddleware(BaseMiddleware):
@@ -16,6 +16,7 @@ class DbSessionMiddleware(BaseMiddleware):
         async with self._session_factory() as session:
             data["session"] = session
             data["users"] = UserRepository(session)
+            data["money_requests"] = MoneyRequestRepository(session)
             try:
                 result = await handler(event, data)
                 await session.commit()
