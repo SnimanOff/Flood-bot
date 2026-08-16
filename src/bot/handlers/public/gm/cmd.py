@@ -1,7 +1,8 @@
-from aiogram import Router
+﻿from aiogram import Router
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message
 
+from src.database.models import User
 from src.database.repositories import UserRepository
 from src.service.sendmsg import send_msg
 from src.service.vault.media import GM_DENIED_MEDIA, GM_MEDIA, GM_OK_MEDIA, GM_USAGE_MEDIA
@@ -48,8 +49,8 @@ async def resolve_target(message: Message, users: UserRepository, token: str | N
 
 
 @router.message(Command("gm"))
-async def cmd_gm(message: Message, command: CommandObject, users: UserRepository) -> None:
-    caller = (await users.get_or_create(message.from_user.id, message.from_user.username))[0]
+async def cmd_gm(message: Message, command: CommandObject, user: User, users: UserRepository) -> None:
+    caller = user
 
     if caller.role < Role.OWNER:
         await send_msg(message, "Недостаточно прав", media=GM_DENIED_MEDIA, only_caller=True)

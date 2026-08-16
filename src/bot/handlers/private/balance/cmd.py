@@ -8,7 +8,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 from src.bot.handlers.private.balance.keyboard import kb_admin_request
-from src.database.models import MoneyRequest
+from src.database.models import MoneyRequest, User
 from src.database.repositories import MoneyRequestRepository, UserRepository
 from src.service.sendmsg import send_msg
 from src.service.vault.media import BALANCE_ASK_MEDIA, BALANCE_SENT_MEDIA
@@ -58,9 +58,7 @@ async def update_admin_messages(bot: Bot, request: MoneyRequest, status_line: st
 # ---------------- запрос средств ----------------
 
 @router.callback_query(F.data == "start_get_balance", F.message.chat.type == "private")
-async def clbck_start_get_balance(callback: CallbackQuery, users: UserRepository, state: FSMContext):
-    user = (await users.get_or_create(callback.from_user.id, callback.from_user.username))[0]
-
+async def clbck_start_get_balance(callback: CallbackQuery, user: User, users: UserRepository, state: FSMContext):
     left = users.cd_left(user)
     if left is not None:
         await callback.answer(f"Подождите ещё {fmt_cd(left)}", show_alert=True)
@@ -71,7 +69,7 @@ async def clbck_start_get_balance(callback: CallbackQuery, users: UserRepository
     await callback.answer()
 
 @router.message(BalanceRequest.amount, F.chat.type == "private")
-async def msg_balance_amount(message: Message, users: UserRepository, state: FSMContext):
+async def msg_balance_amount(message: Message, user: User, users: UserRepository, state: FSMContext):
     raw = (message.text or "").strip()
 
     try:
@@ -84,8 +82,6 @@ async def msg_balance_amount(message: Message, users: UserRepository, state: FSM
         await send_msg(message, "Сумма должна быть больше 0", media=BALANCE_ASK_MEDIA)
         return
 
-    user = (await users.get_or_create(message.from_user.id, message.from_user.username))[0]
-
     left = users.cd_left(user)
     if left is not None:
         await state.clear()
@@ -97,7 +93,7 @@ async def msg_balance_amount(message: Message, users: UserRepository, state: FSM
     await send_msg(message, "Пришлите текст заявки или одно фото с подписью", media=BALANCE_ASK_MEDIA)
 
 @router.message(BalanceRequest.proof, F.chat.type == "private")
-async def msg_balance_proof(message: Message, users: UserRepository, money_requests: MoneyRequestRepository, state: FSMContext, bot: Bot):
+async def msg_balance_proof(message: Message, user: User, users: UserRepository, money_requests: MoneyRequestRepository, state: FSMContext, bot: Bot):
     if message.photo:
         file_id = message.photo[-1].file_id
         text = message.caption or ""
@@ -115,15 +111,13 @@ async def msg_balance_proof(message: Message, users: UserRepository, money_reque
         await send_msg(message, "Введите сумму (целое число):", media=BALANCE_ASK_MEDIA)
         return
 
-    user = (await users.get_or_create(message.from_user.id, message.from_user.username))[0]
-
     left = users.cd_left(user)
     if left is not None:
         await state.clear()
         await send_msg(message, f"Подождите ещё {fmt_cd(left)}", media=BALANCE_ASK_MEDIA)
         return
 
-    await users.set_last_query_money(message.from_user.id)
+    await users.set_last_query_money(user.tg_id)
     await state.clear()
 
     tg_id = message.from_user.id
@@ -178,10 +172,8 @@ async def msg_balance_proof(message: Message, users: UserRepository, money_reque
 # ---------------- решение админа ----------------
 
 @router.callback_query(F.data.startswith("bal_ok:"), F.message.chat.type == "private")
-async def clbck_bal_ok(callback: CallbackQuery, users: UserRepository, money_requests: MoneyRequestRepository, bot: Bot):
-    admin = (await users.get_or_create(callback.from_user.id, callback.from_user.username))[0]
-
-    if admin.role < Role.OWNER:
+async def clbck_bal_ok(callback: CallbackQuery, user: User, users: UserRepository, money_requests: MoneyRequestRepository, bot: Bot):
+    if user.role < Role.OWNER:
         await callback.answer("Недостаточно прав", show_alert=True)
         return
 
@@ -204,10 +196,8 @@ async def clbck_bal_ok(callback: CallbackQuery, users: UserRepository, money_req
     await callback.answer()
 
 @router.callback_query(F.data.startswith("bal_no:"), F.message.chat.type == "private")
-async def clbck_bal_no(callback: CallbackQuery, users: UserRepository, money_requests: MoneyRequestRepository, bot: Bot):
-    admin = (await users.get_or_create(callback.from_user.id, callback.from_user.username))[0]
-
-    if admin.role < Role.OWNER:
+async def clbck_bal_no(callback: CallbackQuery, user: User, users: UserRepository, money_requests: MoneyRequestRepository, bot: Bot):
+    if user.role < Role.OWNER:
         await callback.answer("Недостаточно прав", show_alert=True)
         return
 
