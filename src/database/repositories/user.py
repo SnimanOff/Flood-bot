@@ -2,7 +2,7 @@ from sqlalchemy import select, insert, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.models import User
-from service.vault.roles import Role
+from src.service.vault.roles import Role
 
 from datetime import datetime, timezone, timedelta
 

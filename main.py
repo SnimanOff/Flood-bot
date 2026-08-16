@@ -6,7 +6,7 @@ from src.service.logger import logger
 
 
 async def main() -> None:
-    await init_db()
+    init_db()
     logger.info("database ready")
     try:
         await start_bot()
