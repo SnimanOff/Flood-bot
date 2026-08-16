@@ -1,1 +1,6 @@
 START_MEDIA = ""
+
+GM_MEDIA = ""
+GM_DENIED_MEDIA = ""
+GM_USAGE_MEDIA = ""
+GM_OK_MEDIA = ""

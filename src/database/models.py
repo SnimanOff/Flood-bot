@@ -1,7 +1,7 @@
 from sqlalchemy import BigInteger, Enum, Integer, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-from src.service.enum import Role
+from service.vault.roles import Role
 
 
 class Base(DeclarativeBase):
