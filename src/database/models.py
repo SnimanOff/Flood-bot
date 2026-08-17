@@ -1,6 +1,6 @@
 ﻿from datetime import datetime
 
-from sqlalchemy import BigInteger, DateTime, Enum, Integer, String, Text
+from sqlalchemy import BigInteger, DateTime, Enum, Integer, JSON, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from src.service.vault.roles import Role
@@ -19,6 +19,7 @@ class User(Base):
     username: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     balance: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    inventory: Mapped[dict] = mapped_column(JSON, nullable=False, server_default="{}")
 
     role: Mapped[Role] = mapped_column(Enum(Role, values_callable=lambda intenum: [str(enum.value) for enum in intenum]), nullable=False, default=Role.USER, server_default=str(Role.USER.value))
     banned_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)

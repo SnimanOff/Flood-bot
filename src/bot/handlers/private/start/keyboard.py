@@ -1,17 +1,19 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
+from src.service.vault.buttons import BTN_MY_ITEMS, BTN_SHOP, BTN_SUPPORT, BTN_TOPUP
+
 
 def kb_start() -> InlineKeyboardMarkup:
     keyboard = [
         [
-            InlineKeyboardButton(text="Магазин", callback_data="shop_page:0"),
-            InlineKeyboardButton(text="Пополнить", callback_data="start_get_balance"),
+            InlineKeyboardButton(text=BTN_SHOP, callback_data="shop_page:0"),
+            InlineKeyboardButton(text=BTN_TOPUP, callback_data="start_get_balance"),
         ],
         [
-            InlineKeyboardButton(text="Мои награды", callback_data="start_my_items"),
+            InlineKeyboardButton(text=BTN_MY_ITEMS, callback_data="start_my_items"),
         ],
         [
-            InlineKeyboardButton(text="Поддержка", url="https://t.me/QwertyGeny"),
+            InlineKeyboardButton(text=BTN_SUPPORT, url="https://t.me/QwertyGeny"),
         ],
     ]
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
