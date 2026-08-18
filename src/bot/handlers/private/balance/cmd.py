@@ -155,7 +155,7 @@ async def msg_balance_proof(message: Message, user: User, users: UserRepository,
     else:
         user_link = f'<a href="tg://user?id={tg_id}">{BALANCE_PROFILE}</a>'
 
-    caption_text = escape(text) if text else "—"
+    caption_text = escape(text) if text else "-"
     admin_text = txt_balance_admin(tg_id, user_link, amount, caption_text)
 
     req = await money_requests.create(

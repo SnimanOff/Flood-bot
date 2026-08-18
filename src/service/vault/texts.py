@@ -113,7 +113,7 @@ def txt_check_caption(check_id: int) -> str:
 
 # ---------------- rests ----------------
 RESTS_EMPTY = "Активных рестов нет"
-RESTS_INLINE_HINT = "Нажми кнопку — список уйдёт в чат без прав админа у бота"
+RESTS_INLINE_HINT = "Нажми кнопку - список уйдёт в чат без прав админа у бота"
 RESTS_INLINE_TITLE = "Активные ресты"
 
 
@@ -123,7 +123,7 @@ def txt_rests_line(tg_id: int, username: str | None, until_str: str) -> str:
         who = f'<a href="tg://user?id={tg_id}">@{escape(username)}</a>'
     else:
         who = f'<a href="tg://user?id={tg_id}"><code>{tg_id}</code></a>'
-    return f"• {who} — <b>{until_str}</b>"
+    return f"• {who} - <b>{until_str}</b>"
 
 
 def txt_rests_list(lines: list[str]) -> str:
@@ -134,7 +134,7 @@ def txt_rests_list(lines: list[str]) -> str:
 # ---------------- unpurge ----------------
 UNPURGE_NO_RIGHTS = "Недостаточно прав"
 UNPURGE_EMPTY = "Ни у кого нет пощады"
-UNPURGE_INLINE_HINT = "Нажми кнопку — откроется список без прав админа у бота"
+UNPURGE_INLINE_HINT = "Нажми кнопку - откроется список без прав админа у бота"
 UNPURGE_INLINE_TITLE = "Снять пощаду"
 UNPURGE_DONE = "Пощада снята"
 UNPURGE_FAIL = "Не удалось снять"
@@ -154,3 +154,23 @@ def txt_unpurge_ok(tg_id: int, username: str | None, left: int) -> str:
     who = f"@{username}" if username else str(tg_id)
     return f"Снято с <b>{who}</b>\nОсталось: <b>{left}</b>"
 
+
+# ---------------- my items ----------------
+MY_ITEMS_INV_EMPTY = "пусто"
+MY_ITEMS_REST_NONE = "нет"
+
+
+def txt_my_items_inventory_line(title: str, qty: int) -> str:
+    return f"• {title} ×<b>{qty}</b>"
+
+
+def txt_my_items_rest_active(date_str: str) -> str:
+    return f"до <b>{date_str}</b>"
+
+
+def txt_my_items(inv_block: str, rest_block: str) -> str:
+    return (
+        f"<b>Инвентарь</b>\n{inv_block}\n"
+        f"\n"
+        f"<b>Рест</b>\n{rest_block}"
+    )

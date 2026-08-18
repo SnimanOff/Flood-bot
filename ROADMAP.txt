@@ -1,11 +1,11 @@
-
-- Покупка purge_immunity (+ inventory +1) — done
-- start_my_items — UI инвентаря
-- Чеки: модель + запись + файл для rest buy — done
+﻿
+- Покупка purge_immunity (+ inventory +1) - done
+- start_my_items - UI инвентаря - done (activation later)
+- Чеки: модель + запись + файл для rest buy - done
 - Больше товаров от заказчика (мяо)
-- Stars — не MVP
+- Stars - не MVP
 - smoke e2e с заказчиком
 
 
 сделать просмотр своего инвентаря так же через инлайн
-- /unpurge (inline + pagination, take purge_immunity) — done
+- /unpurge (inline + pagination, take purge_immunity) - done
