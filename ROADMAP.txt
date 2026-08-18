@@ -1,33 +1,10 @@
-﻿ROADMAP — бот внутренней валюты (флуд-чат)
-Состояние кода: август 2026
 
-=== Сделано ===
-- Инфра: async SQLAlchemy, User (balance, role, banned_until, last_query_money)
-- Middleware: session, users, money_requests; user через get_or_create (DI в хендлеры)
-- MemoryStorage FSM, throttle
-- /start private меню: магазин, пополнить, мои награды, поддержка; start_menu назад
-- Заявка на баланс: КД 24ч, FSM сумма -> proof (текст ИЛИ 1 фото+caption), optional photo_file_id
-- money_requests: status pending/ok/no, caption, notifies JSON, однократный resolve
-- bal_ok/bal_no по request_id; обновление всех админ-сообщений; уведомление юзеру
-- Caption админу: ID + ссылка на профиль/username
-- /gm OWNER+ выдача/списание баланса, ephemeral в группах
-- shop router: пагинация, stubs rest/purge_immunity (покупки ещё нет)
-- send_msg + media-заглушки
-- Alembic migrations
-
-=== Не сделано / дыры ===
-- Магазин: title/price, покупка, списание баланса
-- user_items инвентарь, start_my_items
-- Активация наград (purge_immunity, rest) + пинг админам
-- Лог операций баланса (опционально)
+- Покупка purge_immunity (+ inventory +1)
+- start_my_items — UI инвентаря
+- Чеки: модель + запись + файл для rest buy — done
+- Больше товаров от заказчика (мяо)
 - Stars — не MVP
+- smoke e2e с заказчиком
 
-=== Приоритет (делать по порядку) ===
-P1. Магазин: title/price в каталоге + покупка (списание баланса)
-P1. Инвентарь + активация 2 товаров (purge_immunity, rest)
-P2. Больше товаров от заказчика
-P2. Лог операций баланса
-P3. Stars
 
-=== Порядок ===
-smoke -> shop buy -> inventory/activate -> goods list -> stars
+сделать просмотр своего инвентаря так же через инлайн

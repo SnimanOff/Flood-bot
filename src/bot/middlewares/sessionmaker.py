@@ -1,11 +1,11 @@
-﻿from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable
 from typing import Any
 
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from src.database.repositories import MoneyRequestRepository, UserRepository
+from src.database.repositories import CheckRepository, MoneyRequestRepository, UserRepository
 from src.service.errors import AppError
 from src.service.logger import log_app, log_tech
 
@@ -20,6 +20,7 @@ class DbSessionMiddleware(BaseMiddleware):
             data["session"] = session
             data["users"] = users
             data["money_requests"] = MoneyRequestRepository(session)
+            data["checks"] = CheckRepository(session)
 
             log_tech.debug("session open")
 

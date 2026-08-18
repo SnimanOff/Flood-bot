@@ -94,6 +94,11 @@ def txt_rest_no_money(needed: int, balance: int) -> str:
     return f"Недостаточно средств\nНужно: <b>{needed}</b>\nБаланс: <b>{balance}</b>"
 
 
+# ---------------- checks ----------------
+def txt_check_caption(check_id: int) -> str:
+    return f"\u0427\u0435\u043a \u2116{check_id}"
+
+
 # ---------------- rests ----------------
 RESTS_EMPTY = "Активных рестов нет"
 RESTS_INLINE_HINT = "Нажми кнопку — список уйдёт в чат без прав админа у бота"

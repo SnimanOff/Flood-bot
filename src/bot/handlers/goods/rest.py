@@ -1,4 +1,4 @@
-﻿from datetime import datetime, timezone
+from datetime import datetime, timezone
 
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
@@ -6,11 +6,12 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 from src.database.models import User
-from src.database.repositories import UserRepository
+from src.database.repositories import CheckRepository, UserRepository
 from src.service.errors import UserNotFound
 from src.service.logger import log_app, log_fin
+from src.service.receipt import send_check_file
 from src.service.sendmsg import send_msg
-from src.service.vault.goods import Goods, rest_cost, rest_weeks
+from src.service.vault.goods import GOODS, Goods, rest_cost, rest_weeks
 from src.service.vault.texts import (
     REST_ASK_DATE,
     REST_BAD_DATE,
@@ -36,7 +37,7 @@ async def clbck_shop_buy_rest(callback: CallbackQuery, user: User, users: UserRe
 
 
 @router.message(RestBuy.date, F.chat.type == "private")
-async def msg_rest_date(message: Message, user: User, users: UserRepository, state: FSMContext):
+async def msg_rest_date(message: Message, user: User, users: UserRepository, checks: CheckRepository, state: FSMContext):
     log_app.info("rest date input tg_id={}", message.from_user.id)
     raw = (message.text or "").strip()
 
@@ -86,4 +87,14 @@ async def msg_rest_date(message: Message, user: User, users: UserRepository, sta
     await state.clear()
     log_app.info("rest bought tg_id={} until={} cost={} weeks={}", user.tg_id, until, cost, weeks)
     balance = updated.balance
+    check = await checks.create(
+        user_tg_id=user.tg_id,
+        good_id=Goods.REST,
+        good_title=GOODS[Goods.REST]["title"],
+        amount=cost,
+        balance_after=balance,
+        qty=1,
+        meta={"weeks": weeks, "rest_until": raw},
+    )
     await send_msg(message, txt_rest_ok(raw, weeks, cost, balance))
+    await send_check_file(message, check)
