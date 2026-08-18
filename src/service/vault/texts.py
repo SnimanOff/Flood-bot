@@ -92,3 +92,24 @@ def txt_rest_ok(date_str: str, weeks: int, cost: int, balance: int) -> str:
 
 def txt_rest_no_money(needed: int, balance: int) -> str:
     return f"Недостаточно средств\nНужно: <b>{needed}</b>\nБаланс: <b>{balance}</b>"
+
+
+# ---------------- rests ----------------
+RESTS_EMPTY = "Активных рестов нет"
+RESTS_INLINE_HINT = "Нажми кнопку — список уйдёт в чат без прав админа у бота"
+RESTS_INLINE_TITLE = "Активные ресты"
+
+
+def txt_rests_line(tg_id: int, username: str | None, until_str: str) -> str:
+    from html import escape
+    if username:
+        who = f'<a href="tg://user?id={tg_id}">@{escape(username)}</a>'
+    else:
+        who = f'<a href="tg://user?id={tg_id}"><code>{tg_id}</code></a>'
+    return f"• {who} — <b>{until_str}</b>"
+
+
+def txt_rests_list(lines: list[str]) -> str:
+    if not lines:
+        return RESTS_EMPTY
+    return "Активные ресты:\n\n" + "\n".join(lines)

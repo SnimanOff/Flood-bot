@@ -1,4 +1,4 @@
-from sqlalchemy import select, insert, or_
+﻿from sqlalchemy import select, insert, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.models import User
@@ -144,3 +144,22 @@ class UserRepository:
         user.rest_until = until
         await self._session.flush()
         return True
+
+    async def get_active_rests(self) -> list[User]:
+        """
+        Метод получения пользователей с активным рестом
+        """
+        today = datetime.now(timezone.utc).date()
+        stmt = await self._session.execute(select(User).where(User.rest_until.is_not(None)))
+        rows = list(stmt.scalars().all())
+        active: list[User] = []
+        for u in rows:
+            if u.rest_until is None:
+                continue
+            if u.rest_until < today:
+                u.rest_until = None
+            else:
+                active.append(u)
+        await self._session.flush()
+        active.sort(key=lambda u: u.rest_until or today)
+        return active
