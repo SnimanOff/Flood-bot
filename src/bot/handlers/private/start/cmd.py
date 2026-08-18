@@ -15,8 +15,6 @@ router = Router(name="start")
 async def cmd_start(message: Message, user: User) -> None:
     await send_msg(message=message, text=txt_start_hello(message.from_user.first_name), media=START_MEDIA, reply_markup=kb_start())
 
-# ---------------- меню ----------------
-
 @router.callback_query(F.data == "start_menu", F.message.chat.type == "private")
 async def clbck_start_menu(callback: CallbackQuery, user: User) -> None:
     text = txt_start_hello(callback.from_user.first_name)

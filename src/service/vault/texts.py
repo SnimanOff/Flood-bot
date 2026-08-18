@@ -78,3 +78,14 @@ GM_USER_NOT_FOUND = "Пользователь не найден в БД (нуж�
 
 def txt_gm_ok(sign, amount, tg_id, balance) -> str:
     return f"Выдано {sign}{amount}\nID: <code>{tg_id}</code>\nБаланс: <b>{balance}</b>"
+
+# ---------------- rest ----------------
+REST_NO_MONEY = "Недостаточно средств"
+REST_ASK_DATE = "Введите дату окончания реста (ДД.ММ.ГГГГ):"
+REST_BAD_DATE = "Формат: ДД.ММ.ГГГГ"
+REST_PAST_DATE = "Дата не может быть в прошлом"
+
+
+def txt_rest_ok(date_str: str, balance: int) -> str:
+    return f"Рест до <b>{date_str}</b>\nБаланс: <b>{balance}</b>"
+

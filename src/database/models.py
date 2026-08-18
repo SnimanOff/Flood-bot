@@ -1,6 +1,6 @@
-﻿from datetime import datetime
+﻿from datetime import datetime, date
 
-from sqlalchemy import BigInteger, DateTime, Enum, Integer, JSON, String, Text
+from sqlalchemy import BigInteger, DateTime, Enum, Integer, JSON, String, Text, Date
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from src.service.vault.roles import Role
@@ -26,6 +26,7 @@ class User(Base):
 
     last_query_money: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
+    rest_until: Mapped[date | None] = mapped_column(Date, nullable=True, default=None)
 
 class MoneyRequest(Base):
     __tablename__ = "money_requests"

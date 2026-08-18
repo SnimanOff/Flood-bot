@@ -19,6 +19,7 @@ class MoneyRequestRepository:
             status="pending",
             notifies="[]",
         )
+
         self._session.add(req)
         await self._session.flush()
         return req
@@ -28,20 +29,25 @@ class MoneyRequestRepository:
             select(MoneyRequest)
             .where(MoneyRequest.id == request_id)
         )
+
         return stmt.scalar_one_or_none()
 
     async def set_notifies(self, request_id: int, notifies: list[dict]) -> MoneyRequest | None:
         req = await self.get(request_id)
+
         if req is None:
             return None
+        
         req.notifies = json.dumps(notifies)
         await self._session.flush()
         return req
 
     async def resolve(self, request_id: int, status: str) -> MoneyRequest | None:
         req = await self.get(request_id)
+
         if req is None or req.status != "pending":
             return None
+        
         req.status = status
         await self._session.flush()
         return req

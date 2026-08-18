@@ -4,13 +4,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.database.models import User
 from src.service.vault.roles import Role
 
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, date
 
 class UserRepository:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
     async def get_by_tg_id(self, tg_id: int) -> User | None:
+        """
+        Метод получения юзера по его tg_id
+        """
         stmt = await self._session.execute(
             select(User)
             .where(User.tg_id == tg_id)
@@ -19,6 +22,9 @@ class UserRepository:
         return stmt.scalar_one_or_none()
 
     async def get_or_create(self, tg_id: int, username: str | None = None) -> tuple[User, bool]:
+        """
+        Метод получения/создания юзера по tg_id. Возвращает объект юзера
+        """
         user = await self.get_by_tg_id(tg_id)
 
         if user is not None:
@@ -34,19 +40,30 @@ class UserRepository:
         return user, True
 
     async def get_by_username(self, username: str) -> User | None:
+        """
+        Метод получения юзера по его username
+        """
         name = username.lstrip("@").lower()
         stmt = await self._session.execute(select(User).where(User.username.ilike(name)))
         return stmt.scalar_one_or_none()
 
     async def add_balance(self, tg_id: int, amount: int) -> User | None:
+        """
+        Метод добавления баланса по tg_id. Может использоваться для списания
+        """
         user = await self.get_by_tg_id(tg_id)
+
         if user is None:
             return None
+        
         user.balance += amount
         await self._session.flush()
         return user
 
     async def is_banned(self, tg_id: int) -> bool:
+        """
+        Метод проверки пользователя на бан по его tg_id
+        """
         user = await self.get_by_tg_id(tg_id)
 
         if user is None:
@@ -58,6 +75,9 @@ class UserRepository:
         return True
     
     async def get_owners(self) -> list[User]:
+        """
+        Метод для получения листа id всех OWNER
+        """
         now = datetime.now(timezone.utc)
 
         stmt = await self._session.execute(
@@ -71,6 +91,9 @@ class UserRepository:
         return list(stmt.scalars().all())
 
     async def set_last_query_money(self, tg_id: int, when: datetime | None = None) -> User | None:
+        """
+        Метод для установки кулдауна запроса денег
+        """
         user = await self.get_by_tg_id(tg_id)
 
         if user is None:
@@ -82,6 +105,9 @@ class UserRepository:
         return user
 
     def cd_left(self, user: User) -> timedelta | None:
+        """
+        Метод проверки количества оставшегося времени до возможности запросить деньги
+        """
 
         if user.last_query_money is None:
             return None
@@ -98,3 +124,23 @@ class UserRepository:
             return None
         
         return left
+
+    async def check_money(self, user: User, needed: int) -> bool:
+        """
+        Метод для получения информации, хватает ли у пользователя средств
+        """
+
+        return user.balance >= needed
+
+    async def set_rest(self, tg_id: int, until: date) -> bool:
+        """
+        Метод установки реста пользователю
+        """
+        user = await self.get_by_tg_id(tg_id)
+
+        if user is None:
+            return False
+
+        user.rest_until = until
+        await self._session.flush()
+        return True
