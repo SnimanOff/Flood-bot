@@ -1,5 +1,5 @@
 
-- Покупка purge_immunity (+ inventory +1)
+- Покупка purge_immunity (+ inventory +1) — done
 - start_my_items — UI инвентаря
 - Чеки: модель + запись + файл для rest buy — done
 - Больше товаров от заказчика (мяо)

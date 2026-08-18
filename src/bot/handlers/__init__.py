@@ -6,12 +6,14 @@ from src.bot.handlers.private.balance.cmd import router as balance_router
 from src.bot.handlers.public.gm.cmd import router as gm_router
 from src.bot.handlers.public.rests.cmd import router as rests_router
 from src.bot.handlers.goods.rest import router as rest_router
+from src.bot.handlers.goods.purge_immunity import router as purge_router
 
 
 def setup_routers() -> Router:
     root = Router()
     root.include_router(start_router)
     root.include_router(rest_router)
+    root.include_router(purge_router)
     root.include_router(shop_router)
     root.include_router(balance_router)
     root.include_router(gm_router)

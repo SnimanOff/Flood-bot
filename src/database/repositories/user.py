@@ -170,6 +170,18 @@ class UserRepository:
         log_fin.info("rest set tg_id={} until={}", tg_id, until)
         return user
 
+    async def add_inventory(self, tg_id: int, good_id: str, qty: int = 1) -> User:
+        user = await self.get_by_tg_id(tg_id)
+        if user is None:
+            raise UserNotFound(tg_id)
+        inv = dict(user.inventory or {})
+        key = str(good_id)
+        inv[key] = int(inv.get(key, 0)) + qty
+        user.inventory = inv
+        await self._session.flush()
+        log_fin.info("inventory add tg_id={} good={} qty={} total={}", tg_id, key, qty, inv[key])
+        return user
+
     async def get_active_rests(self) -> list[User]:
         """
         Метод получения пользователей с активным рестом

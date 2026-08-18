@@ -94,6 +94,18 @@ def txt_rest_no_money(needed: int, balance: int) -> str:
     return f"Недостаточно средств\nНужно: <b>{needed}</b>\nБаланс: <b>{balance}</b>"
 
 
+
+# ---------------- purge ----------------
+PURGE_NO_MONEY = "Недостаточно средств"
+
+
+def txt_purge_ok(title: str, cost: int, balance: int, qty: int) -> str:
+    return f"Куплено: <b>{title}</b>\nСписано: <b>{cost}</b>\nВ инвентаре: <b>{qty}</b>\nБаланс: <b>{balance}</b>"
+
+
+def txt_purge_no_money(needed: int, balance: int) -> str:
+    return f"Недостаточно средств\nНужно: <b>{needed}</b>\nБаланс: <b>{balance}</b>"
+
 # ---------------- checks ----------------
 def txt_check_caption(check_id: int) -> str:
     return f"\u0427\u0435\u043a \u2116{check_id}"
