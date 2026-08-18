@@ -1,4 +1,6 @@
 ﻿from enum import StrEnum
+import math
+from datetime import date, datetime, timezone
 
 
 class Goods(StrEnum):
@@ -10,7 +12,7 @@ GOODS: dict[str, dict] = {
     Goods.REST: {
         "id": Goods.REST,
         "title": "Продление реста",
-        "description": "Продлевает рест.",
+        "description": "Продлевает рест. Цена указана за 1 неделю реста.",
         "price": 100,
         "active": True,
         "media": "",
@@ -32,3 +34,18 @@ def get_goods() -> list[dict]:
 
 def get_good(good_id: str) -> dict | None:
     return GOODS.get(good_id)
+
+
+def rest_weeks(until: date) -> int:
+    today = datetime.now(timezone.utc).date()
+    days = (until - today).days
+    if days < 0:
+        return 0
+    if days == 0:
+        return 1
+    return max(1, math.ceil(days / 7))
+
+
+def rest_cost(until: date) -> int:
+    weeks = rest_weeks(until)
+    return int(weeks * int(GOODS[Goods.REST]["price"]))

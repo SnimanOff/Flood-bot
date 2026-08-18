@@ -1,4 +1,4 @@
-# ---------------- start ----------------
+﻿# ---------------- start ----------------
 def txt_start_hello(name: str) -> str:
     return f"Привет, {name}!"
 
@@ -86,6 +86,9 @@ REST_BAD_DATE = "Формат: ДД.ММ.ГГГГ"
 REST_PAST_DATE = "Дата не может быть в прошлом"
 
 
-def txt_rest_ok(date_str: str, balance: int) -> str:
-    return f"Рест до <b>{date_str}</b>\nБаланс: <b>{balance}</b>"
+def txt_rest_ok(date_str: str, weeks: int, cost: int, balance: int) -> str:
+    return f"Рест до <b>{date_str}</b>\nНедель: <b>{weeks}</b>\nСписано: <b>{cost}</b>\nБаланс: <b>{balance}</b>"
 
+
+def txt_rest_no_money(needed: int, balance: int) -> str:
+    return f"Недостаточно средств\nНужно: <b>{needed}</b>\nБаланс: <b>{balance}</b>"
