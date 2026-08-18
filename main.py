@@ -1,19 +1,27 @@
-import asyncio
+﻿import asyncio
 
 from src.bot.main import start_bot
 from src.database.core import close_db, init_db
-from src.service.logger import logger
+from src.service.logger import log_app
 
 
 async def main() -> None:
+    log_app.info("app starting")
     init_db()
-    logger.info("database ready")
+    log_app.info("database ready / migrations done")
     try:
         await start_bot()
+    except Exception:
+        log_app.exception("main failed")
+        raise
     finally:
         await close_db()
-        logger.info("database closed")
+        log_app.info("database closed")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except Exception:
+        log_app.exception("process exited with error")
+        raise

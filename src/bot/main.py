@@ -1,11 +1,11 @@
-from aiogram import Bot, Dispatcher
+﻿from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 
 from src.bot.handlers import setup_routers
 from src.bot.middlewares import DbSessionMiddleware
 from src.bot.middlewares.throttling import ThrottleMiddleware
 from src.database.core import async_session_factory
-from src.service.logger import logger
+from src.service.logger import log_app
 from src.service.settings import settings
 
 
@@ -19,10 +19,12 @@ async def start_bot() -> None:
 
     try:
         await bot.delete_webhook(drop_pending_updates=True)
-        logger.info("webhook cleared")
+        log_app.info("webhook cleared")
+        log_app.info("bot polling started")
         await dp.start_polling(bot)
-        logger.info("bot polling started")
-
+    except Exception:
+        log_app.exception("bot polling crashed")
+        raise
     finally:
         await bot.session.close()
-        logger.info("bot stopped")
+        log_app.info("bot stopped")

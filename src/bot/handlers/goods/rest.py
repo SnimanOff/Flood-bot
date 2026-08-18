@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+﻿from datetime import datetime, timezone
 
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
@@ -7,6 +7,8 @@ from aiogram.types import CallbackQuery, Message
 
 from src.database.models import User
 from src.database.repositories import UserRepository
+from src.service.errors import UserNotFound
+from src.service.logger import log_app, log_fin
 from src.service.sendmsg import send_msg
 from src.service.vault.goods import Goods, rest_cost, rest_weeks
 from src.service.vault.texts import (
@@ -27,6 +29,7 @@ class RestBuy(StatesGroup):
 
 @router.callback_query(F.data == f"shop_buy:{Goods.REST}", F.message.chat.type == "private")
 async def clbck_shop_buy_rest(callback: CallbackQuery, user: User, users: UserRepository, state: FSMContext):
+    log_app.info("rest buy start tg_id={}", callback.from_user.id)
     await state.set_state(RestBuy.date)
     await send_msg(callback.message, REST_ASK_DATE, edit=True)
     await callback.answer()
@@ -34,15 +37,18 @@ async def clbck_shop_buy_rest(callback: CallbackQuery, user: User, users: UserRe
 
 @router.message(RestBuy.date, F.chat.type == "private")
 async def msg_rest_date(message: Message, user: User, users: UserRepository, state: FSMContext):
+    log_app.info("rest date input tg_id={}", message.from_user.id)
     raw = (message.text or "").strip()
 
     try:
         until = datetime.strptime(raw, "%d.%m.%Y").date()
     except ValueError:
+        log_app.warning("rest bad date tg_id={} raw={}", message.from_user.id, raw)
         await send_msg(message, REST_BAD_DATE)
         return
 
     if until < datetime.now(timezone.utc).date():
+        log_app.warning("rest past date tg_id={} raw={}", message.from_user.id, raw)
         await send_msg(message, REST_PAST_DATE)
         return
 
@@ -52,18 +58,32 @@ async def msg_rest_date(message: Message, user: User, users: UserRepository, sta
     enough = await users.check_money(user, cost)
 
     if not enough:
+        log_app.warning("rest no money tg_id={} cost={} balance={}", user.tg_id, cost, user.balance)
         await state.clear()
         await send_msg(message, txt_rest_no_money(cost, user.balance))
         return
 
-    updated = await users.add_balance(user.tg_id, -cost)
-    ok = await users.set_rest(user.tg_id, until)
-    await state.clear()
-
-    if not ok:
-        await users.add_balance(user.tg_id, cost)
+    try:
+        updated = await users.add_balance(user.tg_id, -cost)
+    except UserNotFound:
+        log_app.error("rest charge UserNotFound tg_id={}", user.tg_id)
+        await state.clear()
         await send_msg(message, REST_NO_MONEY)
         return
 
-    balance = updated.balance if updated else user.balance - cost
+    try:
+        await users.set_rest(user.tg_id, until)
+    except UserNotFound:
+        log_fin.warning("rest refund tg_id={} cost={}", user.tg_id, cost)
+        try:
+            await users.add_balance(user.tg_id, cost)
+        except UserNotFound:
+            log_app.error("rest refund failed UserNotFound tg_id={}", user.tg_id)
+        await state.clear()
+        await send_msg(message, REST_NO_MONEY)
+        return
+
+    await state.clear()
+    log_app.info("rest bought tg_id={} until={} cost={} weeks={}", user.tg_id, until, cost, weeks)
+    balance = updated.balance
     await send_msg(message, txt_rest_ok(raw, weeks, cost, balance))

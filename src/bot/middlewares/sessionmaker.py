@@ -6,6 +6,8 @@ from aiogram.types import TelegramObject
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from src.database.repositories import MoneyRequestRepository, UserRepository
+from src.service.errors import AppError
+from src.service.logger import log_app, log_tech
 
 
 class DbSessionMiddleware(BaseMiddleware):
@@ -19,17 +21,29 @@ class DbSessionMiddleware(BaseMiddleware):
             data["users"] = users
             data["money_requests"] = MoneyRequestRepository(session)
 
+            log_tech.debug("session open")
+
             from_user = data.get("event_from_user")
             if from_user is not None:
                 user, created = await users.get_or_create(from_user.id, from_user.username)
                 data["user"] = user
+                if created:
+                    log_app.info("user created tg_id={}", from_user.id)
+                else:
+                    log_tech.debug("user loaded tg_id={}", from_user.id)
             else:
                 data["user"] = None
 
             try:
                 result = await handler(event, data)
                 await session.commit()
+                log_tech.debug("session commit")
                 return result
+            except AppError as e:
+                await session.rollback()
+                log_app.warning("domain error: {}", e)
+                raise
             except Exception:
                 await session.rollback()
+                log_app.exception("handler failed, rollback")
                 raise

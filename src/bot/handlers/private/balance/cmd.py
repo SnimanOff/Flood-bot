@@ -1,4 +1,4 @@
-import json
+﻿import json
 from datetime import timedelta
 from html import escape
 
@@ -10,6 +10,8 @@ from aiogram.types import CallbackQuery, Message
 from src.bot.handlers.private.balance.keyboard import kb_admin_request
 from src.database.models import MoneyRequest, User
 from src.database.repositories import MoneyRequestRepository, UserRepository
+from src.service.errors import MoneyRequestAlreadyResolved, MoneyRequestNotFound, UserNotFound
+from src.service.logger import log_app, log_tech
 from src.service.sendmsg import send_msg
 from src.service.vault.media import BALANCE_ASK_MEDIA, BALANCE_SENT_MEDIA
 from src.service.vault.roles import Role
@@ -72,14 +74,17 @@ async def update_admin_messages(bot: Bot, request: MoneyRequest, status_line: st
             else:
                 await bot.edit_message_text(chat_id=item["chat_id"], message_id=item["message_id"], text=text, parse_mode="HTML", reply_markup=None)
         except Exception:
-            pass
+            log_tech.warning("update_admin_messages edit fail chat_id={} message_id={}", item.get("chat_id"), item.get("message_id"))
+
 
 # ---------------- запрос средств ----------------
 
 @router.callback_query(F.data == "start_get_balance", F.message.chat.type == "private")
 async def clbck_start_get_balance(callback: CallbackQuery, user: User, users: UserRepository, state: FSMContext):
+    log_app.info("get_balance start tg_id={}", callback.from_user.id)
     left = users.cd_left(user)
     if left is not None:
+        log_app.warning("get_balance cd hit tg_id={} left={}", user.tg_id, left)
         await callback.answer(txt_balance_cd(fmt_cd(left)), show_alert=True)
         return
 
@@ -89,6 +94,7 @@ async def clbck_start_get_balance(callback: CallbackQuery, user: User, users: Us
 
 @router.message(BalanceRequest.amount, F.chat.type == "private")
 async def msg_balance_amount(message: Message, user: User, users: UserRepository, state: FSMContext):
+    log_app.info("balance amount step tg_id={}", message.from_user.id)
     raw = (message.text or "").strip()
 
     try:
@@ -103,16 +109,19 @@ async def msg_balance_amount(message: Message, user: User, users: UserRepository
 
     left = users.cd_left(user)
     if left is not None:
+        log_app.warning("balance amount cd hit tg_id={}", user.tg_id)
         await state.clear()
         await send_msg(message, txt_balance_cd(fmt_cd(left)), media=BALANCE_ASK_MEDIA)
         return
 
     await state.update_data(amount=amount)
     await state.set_state(BalanceRequest.proof)
+    log_app.info("balance amount ok tg_id={} amount={}", user.tg_id, amount)
     await send_msg(message, BALANCE_ASK_PROOF, media=BALANCE_ASK_MEDIA)
 
 @router.message(BalanceRequest.proof, F.chat.type == "private")
 async def msg_balance_proof(message: Message, user: User, users: UserRepository, money_requests: MoneyRequestRepository, state: FSMContext, bot: Bot):
+    log_app.info("balance proof step tg_id={}", message.from_user.id)
     if message.photo:
         file_id = message.photo[-1].file_id
         text = message.caption or ""
@@ -132,6 +141,7 @@ async def msg_balance_proof(message: Message, user: User, users: UserRepository,
 
     left = users.cd_left(user)
     if left is not None:
+        log_app.warning("balance proof cd hit tg_id={}", user.tg_id)
         await state.clear()
         await send_msg(message, txt_balance_cd(fmt_cd(left)), media=BALANCE_ASK_MEDIA)
         return
@@ -176,10 +186,11 @@ async def msg_balance_proof(message: Message, user: User, users: UserRepository,
                 )
             notifies.append({"chat_id": msg.chat.id, "message_id": msg.message_id})
         except Exception:
-            pass
+            log_app.warning("notify owner fail owner_tg_id={} request_id={}", owner.tg_id, req.id)
 
     await money_requests.set_notifies(req.id, notifies)
 
+    log_app.info("balance request submitted tg_id={} request_id={} amount={}", tg_id, req.id, amount)
     await send_msg(message, BALANCE_SENT, media=BALANCE_SENT_MEDIA)
 
 # ---------------- решение админа ----------------
@@ -187,38 +198,54 @@ async def msg_balance_proof(message: Message, user: User, users: UserRepository,
 @router.callback_query(F.data.startswith("bal_ok:"), F.message.chat.type == "private")
 async def clbck_bal_ok(callback: CallbackQuery, user: User, users: UserRepository, money_requests: MoneyRequestRepository, bot: Bot):
     if user.role < Role.OWNER:
+        log_app.warning("bal_ok denied tg_id={}", user.tg_id)
         await callback.answer(BALANCE_NO_RIGHTS, show_alert=True)
         return
 
     parts = callback.data.split(":")
     request_id = int(parts[1])
+    log_app.info("bal_ok admin_tg_id={} request_id={}", user.tg_id, request_id)
 
-    req = await money_requests.resolve(request_id, "ok")
-    if req is None:
+    try:
+        req = await money_requests.resolve(request_id, "ok")
+    except MoneyRequestNotFound:
+        await callback.answer(BALANCE_ALREADY, show_alert=True)
+        return
+    except MoneyRequestAlreadyResolved:
         await callback.answer(BALANCE_ALREADY, show_alert=True)
         return
 
-    await users.add_balance(req.user_tg_id, req.amount)
+    try:
+        await users.add_balance(req.user_tg_id, req.amount)
+    except UserNotFound:
+        log_app.error("bal_ok UserNotFound user_tg_id={} request_id={}", req.user_tg_id, request_id)
+
     await update_admin_messages(bot, req, BALANCE_STATUS_OK)
 
     try:
         await bot.send_message(req.user_tg_id, txt_balance_user_ok(req.amount), parse_mode="HTML")
     except Exception:
-        pass
+        log_app.warning("bal_ok notify user fail user_tg_id={}", req.user_tg_id)
 
     await callback.answer()
 
 @router.callback_query(F.data.startswith("bal_no:"), F.message.chat.type == "private")
 async def clbck_bal_no(callback: CallbackQuery, user: User, users: UserRepository, money_requests: MoneyRequestRepository, bot: Bot):
     if user.role < Role.OWNER:
+        log_app.warning("bal_no denied tg_id={}", user.tg_id)
         await callback.answer(BALANCE_NO_RIGHTS, show_alert=True)
         return
 
     parts = callback.data.split(":")
     request_id = int(parts[1])
+    log_app.info("bal_no admin_tg_id={} request_id={}", user.tg_id, request_id)
 
-    req = await money_requests.resolve(request_id, "no")
-    if req is None:
+    try:
+        req = await money_requests.resolve(request_id, "no")
+    except MoneyRequestNotFound:
+        await callback.answer(BALANCE_ALREADY, show_alert=True)
+        return
+    except MoneyRequestAlreadyResolved:
         await callback.answer(BALANCE_ALREADY, show_alert=True)
         return
 
@@ -227,6 +254,6 @@ async def clbck_bal_no(callback: CallbackQuery, user: User, users: UserRepositor
     try:
         await bot.send_message(req.user_tg_id, txt_balance_user_no(req.amount), parse_mode="HTML")
     except Exception:
-        pass
+        log_app.warning("bal_no notify user fail user_tg_id={}", req.user_tg_id)
 
     await callback.answer()

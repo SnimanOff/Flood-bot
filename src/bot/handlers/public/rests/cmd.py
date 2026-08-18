@@ -6,6 +6,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InlineQuer
 
 from src.database.models import User
 from src.database.repositories import UserRepository
+from src.service.logger import log_app
 from src.service.sendmsg import send_msg
 from src.service.vault.buttons import BTN_RESTS_LIST
 from src.service.vault.texts import RESTS_EMPTY, RESTS_INLINE_HINT, RESTS_INLINE_TITLE, txt_rests_line, txt_rests_list
@@ -29,6 +30,7 @@ def kb_rests_inline() -> InlineKeyboardMarkup:
 @router.message(Command("rests"))
 async def cmd_rests(message: Message, users: UserRepository) -> None:
     active = await users.get_active_rests()
+    log_app.info("/rests tg_id={} count={}", message.from_user.id if message.from_user else None, len(active))
     text = format_rests(active)
     if message.chat.type == "private":
         await send_msg(message, text, reply_markup=kb_rests_inline())
@@ -44,6 +46,7 @@ async def inline_rests(query: InlineQuery, users: UserRepository) -> None:
         return
 
     active = await users.get_active_rests()
+    log_app.info("inline_rests tg_id={} count={}", query.from_user.id, len(active))
     text = format_rests(active)
     result = InlineQueryResultArticle(
         id=str(uuid4()),

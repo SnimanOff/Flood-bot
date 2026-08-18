@@ -1,9 +1,12 @@
-from collections.abc import Awaitable, Callable
+﻿from collections.abc import Awaitable, Callable
 from typing import Any
 
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject
-import time 
+import time
+
+from src.service.logger import log_tech
+
 
 class ThrottleMiddleware(BaseMiddleware):
     def __init__(self, rate: float = 0.5) -> None:
@@ -18,6 +21,7 @@ class ThrottleMiddleware(BaseMiddleware):
         now = time.monotonic()
         last = self._last.get(user.id, 0.0)
         if now - last < self.rate:
+            log_tech.debug("throttle skip user_id={}", user.id)
             return
 
         self._last[user.id] = now

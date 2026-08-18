@@ -1,9 +1,11 @@
-from aiogram import Router
+﻿from aiogram import Router
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message
 
 from src.database.models import User
 from src.database.repositories import UserRepository
+from src.service.errors import UserNotFound
+from src.service.logger import log_app
 from src.service.sendmsg import send_msg
 from src.service.vault.media import GM_DENIED_MEDIA, GM_MEDIA, GM_OK_MEDIA, GM_USAGE_MEDIA
 from src.service.vault.roles import Role
@@ -27,10 +29,10 @@ def parse_amount(raw: str) -> int | None:
 
     except ValueError:
         return None
-    
+
     if amount == 0:
         return None
-    
+
     return amount
 
 
@@ -53,15 +55,17 @@ async def resolve_target(message: Message, users: UserRepository, token: str | N
     user = await users.get_by_username(token)
     if user is None:
         return None, GM_USER_NOT_FOUND
-    
+
     return user.tg_id, None
 
 
 @router.message(Command("gm"))
 async def cmd_gm(message: Message, command: CommandObject, user: User, users: UserRepository) -> None:
+    log_app.info("/gm tg_id={} args={}", message.from_user.id, command.args)
     caller = user
 
     if caller.role < Role.OWNER:
+        log_app.warning("gm denied tg_id={} role={}", caller.tg_id, caller.role)
         await send_msg(message, GM_NO_RIGHTS, media=GM_DENIED_MEDIA, only_caller=True)
         return
 
@@ -88,10 +92,13 @@ async def cmd_gm(message: Message, command: CommandObject, user: User, users: Us
         await send_msg(message, error, media=GM_USAGE_MEDIA, only_caller=True)
         return
 
-    target = await users.add_balance(target_id, amount)
-    if target is None:
+    try:
+        target = await users.add_balance(target_id, amount)
+    except UserNotFound:
+        log_app.warning("gm UserNotFound target_id={}", target_id)
         await send_msg(message, GM_UPDATE_FAIL, media=GM_USAGE_MEDIA, only_caller=True)
         return
 
+    log_app.info("gm by admin tg_id={} target={} amount={}", caller.tg_id, target.tg_id, amount)
     sign = "+" if amount > 0 else ""
     await send_msg(message, text=txt_gm_ok(sign, amount, target.tg_id, target.balance), media=GM_OK_MEDIA or GM_MEDIA, only_caller=True)
