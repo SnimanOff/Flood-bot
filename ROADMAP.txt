@@ -8,3 +8,4 @@
 
 
 сделать просмотр своего инвентаря так же через инлайн
+- /unpurge (inline + pagination, take purge_immunity) — done

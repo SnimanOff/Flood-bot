@@ -130,3 +130,27 @@ def txt_rests_list(lines: list[str]) -> str:
     if not lines:
         return RESTS_EMPTY
     return "Активные ресты:\n\n" + "\n".join(lines)
+
+# ---------------- unpurge ----------------
+UNPURGE_NO_RIGHTS = "Недостаточно прав"
+UNPURGE_EMPTY = "Ни у кого нет пощады"
+UNPURGE_INLINE_HINT = "Нажми кнопку — откроется список без прав админа у бота"
+UNPURGE_INLINE_TITLE = "Снять пощаду"
+UNPURGE_DONE = "Пощада снята"
+UNPURGE_FAIL = "Не удалось снять"
+UNPURGE_NONE = "У пользователя нет пощады"
+
+
+def txt_unpurge_header(page: int, total: int, count: int) -> str:
+    return f"<b>Пощада на чистке</b>\nВсего: <b>{count}</b>\nСтр. {page + 1}/{total}"
+
+
+def txt_unpurge_btn(username: str | None, tg_id: int, qty: int) -> str:
+    name = f"@{username}" if username else str(tg_id)
+    return f"{name} ×{qty}"
+
+
+def txt_unpurge_ok(tg_id: int, username: str | None, left: int) -> str:
+    who = f"@{username}" if username else str(tg_id)
+    return f"Снято с <b>{who}</b>\nОсталось: <b>{left}</b>"
+

@@ -1,4 +1,4 @@
-﻿class AppError(Exception):
+class AppError(Exception):
     """Domain error base."""
 
 
@@ -37,3 +37,11 @@ class GoodUnavailable(AppError):
 class PermissionDenied(AppError):
     def __init__(self, detail: str = "permission denied"):
         super().__init__(detail)
+
+
+class NotEnoughInventory(AppError):
+    def __init__(self, tg_id: int, good_id: str, needed: int = 1):
+        self.tg_id = tg_id
+        self.good_id = good_id
+        self.needed = needed
+        super().__init__(f"not enough inventory tg_id={tg_id} good={good_id}")

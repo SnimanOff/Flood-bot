@@ -4,7 +4,7 @@ from sqlalchemy import select, insert, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.models import User
-from src.service.errors import UserNotFound
+from src.service.errors import NotEnoughInventory, UserNotFound
 from src.service.logger import log_app, log_fin, log_tech
 from src.service.vault.roles import Role
 
@@ -204,3 +204,36 @@ class UserRepository:
         active.sort(key=lambda u: u.rest_until or today)
         log_tech.info("get_active_rests expired_cleared={} active={}", expired, len(active))
         return active
+
+    async def get_inventory_holders(self, good_id: str) -> list[tuple[User, int]]:
+        """Users with good_id qty > 0, sorted qty DESC then tg_id."""
+        key = str(good_id)
+        stmt = await self._session.execute(select(User))
+        holders: list[tuple[User, int]] = []
+        for u in stmt.scalars().all():
+            qty = int((u.inventory or {}).get(key, 0) or 0)
+            if qty > 0:
+                holders.append((u, qty))
+        holders.sort(key=lambda item: (-item[1], item[0].tg_id))
+        log_tech.info("get_inventory_holders good={} count={}", key, len(holders))
+        return holders
+
+    async def take_inventory(self, tg_id: int, good_id: str, qty: int = 1) -> User:
+        user = await self.get_by_tg_id(tg_id)
+        if user is None:
+            raise UserNotFound(tg_id)
+        inv = dict(user.inventory or {})
+        key = str(good_id)
+        have = int(inv.get(key, 0) or 0)
+        if have < qty:
+            raise NotEnoughInventory(tg_id, key, qty)
+        left = have - qty
+        if left <= 0:
+            inv.pop(key, None)
+        else:
+            inv[key] = left
+        user.inventory = inv
+        await self._session.flush()
+        log_fin.info("inventory take tg_id={} good={} qty={} left={}", tg_id, key, qty, left)
+        return user
+
