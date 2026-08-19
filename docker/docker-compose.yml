@@ -1,4 +1,4 @@
-services:
+﻿services:
 
   db:
     image: postgres:16-alpine
@@ -25,9 +25,33 @@ services:
       - ../.env
     environment:
       DATABASE: postgresql+asyncpg://postgres:postgres@db:5432/postgres
+      BOT_MODE: webhook
+      WEBHOOK_PORT: "8080"
+    expose:
+      - "8080"
     depends_on:
       db:
         condition: service_healthy
 
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    env_file:
+      - ../.env
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - bot
+
 volumes:
   pgdata:
+  caddy_data:
+  caddy_config:
