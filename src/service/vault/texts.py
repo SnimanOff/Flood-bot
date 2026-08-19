@@ -198,6 +198,7 @@ def txt_rests_list(lines: list[str]) -> str:
 
 # ---------------- rmrest ----------------
 RMREST_EMPTY = "Активных рестов нет"
+RMREST_INLINE_TITLE = "Снять рест"
 
 
 def txt_rmrest_header(page: int, total: int, count: int) -> str:

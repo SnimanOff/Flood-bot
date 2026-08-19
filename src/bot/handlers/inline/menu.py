@@ -4,6 +4,8 @@ from aiogram import Router
 from aiogram.types import InlineQuery, InlineQueryResultArticle, InputTextMessageContent
 
 from src.bot.handlers.public.rests.format import format_rests
+from src.bot.handlers.public.rmrest.helpers import rmrest_text
+from src.bot.handlers.public.rmrest.keyboard import kb_rmrest
 from src.bot.handlers.public.unpurge.helpers import GOOD, unpurge_text
 from src.bot.handlers.public.unpurge.keyboard import kb_unpurge
 from src.database.models import User
@@ -14,6 +16,8 @@ from src.service.vault.texts import (
     HELP_INLINE_TITLE,
     RESTS_EMPTY,
     RESTS_INLINE_TITLE,
+    RMREST_EMPTY,
+    RMREST_INLINE_TITLE,
     UNPURGE_EMPTY,
     UNPURGE_INLINE_TITLE,
     txt_help_body,
@@ -57,6 +61,16 @@ async def inline_menu(query: InlineQuery, user: User, users: UserRepository):
             id=str(uuid4()),
             title=UNPURGE_INLINE_TITLE,
             description=str(len(holders)) if holders else UNPURGE_EMPTY,
+            input_message_content=InputTextMessageContent(message_text=text, parse_mode="HTML"),
+            reply_markup=markup,
+        ))
+
+        text = rmrest_text(active, 0)
+        markup = kb_rmrest(active, 0) if active else None
+        results.append(InlineQueryResultArticle(
+            id=str(uuid4()),
+            title=RMREST_INLINE_TITLE,
+            description=str(len(active)) if active else RMREST_EMPTY,
             input_message_content=InputTextMessageContent(message_text=text, parse_mode="HTML"),
             reply_markup=markup,
         ))
