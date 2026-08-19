@@ -1,4 +1,4 @@
-# ---------------- common ----------------
+﻿# ---------------- common ----------------
 ERR_NO_RIGHTS = "Недостаточно прав"
 ERR_NO_MONEY = "Недостаточно средств"
 ERR_ALREADY = "Уже обработано"
@@ -19,7 +19,7 @@ def txt_start_hello(name: str, version: str, updated: str) -> str:
     return (
         f"Привет, {name}!\n"
         f"\n"
-        f"Версия: <code>{version}</code>\n"
+        f"Версия: <code>v{version}</code>\n"
         f"Последнее обновление: {updated}"
     )
 
