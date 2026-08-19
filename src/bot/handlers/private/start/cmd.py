@@ -8,6 +8,7 @@ from src.service.logger import log_app
 from src.service.sendmsg import send_msg
 from src.service.vault.media import START_MEDIA
 from src.service.vault.texts import txt_start_hello
+from src.service.vault.version import get_version_info
 
 router = Router(name="start")
 
@@ -15,12 +16,17 @@ router = Router(name="start")
 @router.message(Command("start"), F.chat.type == "private")
 async def cmd_start(message: Message, user: User) -> None:
     log_app.info("/start tg_id={}", message.from_user.id)
-    await send_msg(message=message, text=txt_start_hello(message.from_user.first_name), media=START_MEDIA, reply_markup=kb_start())
+    version, updated = get_version_info()
+    name = message.from_user.first_name or "РґСЂСѓРі"
+    text = txt_start_hello(name, version, updated)
+    await send_msg(message=message, text=text, media=START_MEDIA, reply_markup=kb_start())
 
 @router.callback_query(F.data == "start_menu", F.message.chat.type == "private")
 async def clbck_start_menu(callback: CallbackQuery, user: User) -> None:
     log_app.info("start_menu tg_id={}", callback.from_user.id)
-    text = txt_start_hello(callback.from_user.first_name)
+    version, updated = get_version_info()
+    name = callback.from_user.first_name or "РґСЂСѓРі"
+    text = txt_start_hello(name, version, updated)
 
     if callback.message.photo:
         await callback.message.edit_caption(caption=text, reply_markup=kb_start())

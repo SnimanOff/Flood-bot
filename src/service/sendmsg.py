@@ -1,4 +1,4 @@
-﻿from aiogram.enums import ChatType
+from aiogram.enums import ChatType
 from aiogram.types import InputMediaPhoto, Message
 
 from src.service.logger import log_tech

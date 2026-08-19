@@ -1,4 +1,4 @@
-﻿from aiogram import Router
+from aiogram import Router
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message
 
@@ -10,9 +10,9 @@ from src.service.sendmsg import send_msg
 from src.service.vault.media import GM_DENIED_MEDIA, GM_MEDIA, GM_OK_MEDIA, GM_USAGE_MEDIA
 from src.service.vault.roles import Role
 from src.service.vault.texts import (
+    ERR_NO_RIGHTS,
     GM_BAD_AMOUNT,
     GM_NEED_TARGET,
-    GM_NO_RIGHTS,
     GM_UPDATE_FAIL,
     GM_USAGE,
     GM_USER_NOT_FOUND,
@@ -66,7 +66,7 @@ async def cmd_gm(message: Message, command: CommandObject, user: User, users: Us
 
     if caller.role < Role.OWNER:
         log_app.warning("gm denied tg_id={} role={}", caller.tg_id, caller.role)
-        await send_msg(message, GM_NO_RIGHTS, media=GM_DENIED_MEDIA, only_caller=True)
+        await send_msg(message, ERR_NO_RIGHTS, media=GM_DENIED_MEDIA, only_caller=True)
         return
 
     args = (command.args or "").split()

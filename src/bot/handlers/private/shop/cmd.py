@@ -1,4 +1,4 @@
-﻿from aiogram import Router, F
+from aiogram import Router, F
 from aiogram.types import CallbackQuery
 
 from src.bot.handlers.private.shop.keyboard import kb_shop, kb_buy
@@ -6,7 +6,7 @@ from src.database.models import User
 from src.service.logger import log_app
 from src.service.sendmsg import send_msg
 from src.service.vault.goods import get_goods, get_good
-from src.service.vault.texts import SHOP_UNAVAILABLE, txt_good_card, txt_shop_page
+from src.service.vault.texts import SHOP_UNAVAILABLE, txt_good_card, txt_page
 
 
 router = Router(name="shop")
@@ -21,7 +21,7 @@ async def clbck_shop_noop(callback: CallbackQuery, user: User):
     parts = callback.data.split(":")
     cur, total = parts[1], parts[2]
 
-    await callback.answer(txt_shop_page(cur, total))
+    await callback.answer(txt_page(cur, total))
 
 
 @router.callback_query(F.data.startswith("shop_page:"), F.message.chat.type == "private")

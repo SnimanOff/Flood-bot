@@ -1,14 +1,64 @@
-﻿# ---------------- start ----------------
-def txt_start_hello(name: str) -> str:
-    return f"Привет, {name}!"
+# ---------------- common ----------------
+ERR_NO_RIGHTS = "Недостаточно прав"
+ERR_NO_MONEY = "Недостаточно средств"
+ERR_ALREADY = "Уже обработано"
+ERR_USER_NOT_FOUND = "Пользователь не найден"
+INLINE_HINT = "Нажми кнопку — откроется без прав админа у бота"
+
+
+def txt_no_money(needed: int, balance: int) -> str:
+    return f"Недостаточно средств\nНужно: <b>{needed}</b>\nБаланс: <b>{balance}</b>"
+
+
+def txt_page(cur, total) -> str:
+    return f"Страница {cur} из {total}"
+
+
+# ---------------- start ----------------
+def txt_start_hello(name: str, version: str, updated: str) -> str:
+    return (
+        f"Привет, {name}!\n"
+        f"\n"
+        f"Версия: <code>{version}</code>\n"
+        f"Последнее обновление: {updated}"
+    )
+
+
+# ---------------- help ----------------
+HELP_INLINE_TITLE = "Справка"
+
+
+def txt_help_body() -> str:
+    from src.service.vault.version import get_cached_version
+    ver = get_cached_version()
+    return (
+        f"<b>Справка бота</b> <code>v{ver}</code>\n"
+        f"\n"
+        f"<b>Личка</b>\n"
+        f"/start — меню (магазин, пополнить, награды)\n"
+        f"Магазин — рест (цена за неделю), пощада\n"
+        f"Пополнить — заявка на валюту (КД 24ч, текст или фото)\n"
+        f"Мои награды — инвентарь + рест\n"
+        f"\n"
+        f"<b>Группа / inline</b> (без админ-прав бота)\n"
+        f"@bot rests — активные ресты\n"
+        f"@bot unpurge — снять пощаду (OWNER+)\n"
+        f"@bot help — эта справка\n"
+        f"\n"
+        f"<b>Команды</b>\n"
+        f"/help — справка (в группе только вам)\n"
+        f"/rests — ресты\n"
+        f"/unpurge — снять пощаду (OWNER+)\n"
+        f"/gm &lt;id|@user&gt; &lt;сумма&gt; — выдача валюты (OWNER+)\n"
+        f"reply + /gm &lt;сумма&gt;\n"
+        f"\n"
+        f"<b>Админам</b>\n"
+        f"Заявки на баланс приходят в ЛС — Принять/Отказать"
+    )
 
 
 # ---------------- shop ----------------
 SHOP_UNAVAILABLE = "Товар недоступен"
-
-
-def txt_shop_page(cur, total) -> str:
-    return f"Страница {cur} из {total}"
 
 
 def txt_good_card(good: dict) -> str:
@@ -26,8 +76,6 @@ BALANCE_NEED_INT = "Введите целое число"
 BALANCE_NEED_POSITIVE = "Сумма должна быть больше 0"
 BALANCE_ASK_PROOF = "Пришлите текст заявки или одно фото с подписью"
 BALANCE_SENT = "Заявка отправлена"
-BALANCE_NO_RIGHTS = "Недостаточно прав"
-BALANCE_ALREADY = "Уже обработано"
 BALANCE_STATUS_OK = "\n\nПринято"
 BALANCE_STATUS_NO = "\n\nОтказано"
 BALANCE_PROFILE = "профиль"
@@ -68,7 +116,6 @@ def txt_balance_user_no(amount) -> str:
 
 
 # ---------------- gm ----------------
-GM_NO_RIGHTS = "Недостаточно прав"
 GM_USAGE = "Использование:\n/gm <id|@user> <сумма>\nили reply: /gm <сумма>"
 GM_BAD_AMOUNT = "Сумма должна быть целым числом ≠ 0"
 GM_UPDATE_FAIL = "Не удалось обновить баланс"
@@ -79,8 +126,8 @@ GM_USER_NOT_FOUND = "Пользователь не найден в БД (нуж�
 def txt_gm_ok(sign, amount, tg_id, balance) -> str:
     return f"Выдано {sign}{amount}\nID: <code>{tg_id}</code>\nБаланс: <b>{balance}</b>"
 
+
 # ---------------- rest ----------------
-REST_NO_MONEY = "Недостаточно средств"
 REST_ASK_DATE = "Введите дату окончания реста (ДД.ММ.ГГГГ):"
 REST_BAD_DATE = "Формат: ДД.ММ.ГГГГ"
 REST_PAST_DATE = "Дата не может быть в прошлом"
@@ -90,30 +137,18 @@ def txt_rest_ok(date_str: str, weeks: int, cost: int, balance: int) -> str:
     return f"Рест до <b>{date_str}</b>\nНедель: <b>{weeks}</b>\nСписано: <b>{cost}</b>\nБаланс: <b>{balance}</b>"
 
 
-def txt_rest_no_money(needed: int, balance: int) -> str:
-    return f"Недостаточно средств\nНужно: <b>{needed}</b>\nБаланс: <b>{balance}</b>"
-
-
-
 # ---------------- purge ----------------
-PURGE_NO_MONEY = "Недостаточно средств"
-
-
 def txt_purge_ok(title: str, cost: int, balance: int, qty: int) -> str:
     return f"Куплено: <b>{title}</b>\nСписано: <b>{cost}</b>\nВ инвентаре: <b>{qty}</b>\nБаланс: <b>{balance}</b>"
 
 
-def txt_purge_no_money(needed: int, balance: int) -> str:
-    return f"Недостаточно средств\nНужно: <b>{needed}</b>\nБаланс: <b>{balance}</b>"
-
 # ---------------- checks ----------------
 def txt_check_caption(check_id: int) -> str:
-    return f"\u0427\u0435\u043a \u2116{check_id}"
+    return f"Чек №{check_id}"
 
 
 # ---------------- rests ----------------
 RESTS_EMPTY = "Активных рестов нет"
-RESTS_INLINE_HINT = "Нажми кнопку - список уйдёт в чат без прав админа у бота"
 RESTS_INLINE_TITLE = "Активные ресты"
 
 
@@ -131,10 +166,9 @@ def txt_rests_list(lines: list[str]) -> str:
         return RESTS_EMPTY
     return "Активные ресты:\n\n" + "\n".join(lines)
 
+
 # ---------------- unpurge ----------------
-UNPURGE_NO_RIGHTS = "Недостаточно прав"
 UNPURGE_EMPTY = "Ни у кого нет пощады"
-UNPURGE_INLINE_HINT = "Нажми кнопку - откроется список без прав админа у бота"
 UNPURGE_INLINE_TITLE = "Снять пощаду"
 UNPURGE_DONE = "Пощада снята"
 UNPURGE_FAIL = "Не удалось снять"

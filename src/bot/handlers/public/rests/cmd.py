@@ -1,4 +1,4 @@
-﻿from uuid import uuid4
+from uuid import uuid4
 
 from aiogram import Router
 from aiogram.filters import Command
@@ -9,7 +9,7 @@ from src.database.models import User
 from src.database.repositories import UserRepository
 from src.service.logger import log_app
 from src.service.sendmsg import send_msg
-from src.service.vault.texts import RESTS_EMPTY, RESTS_INLINE_HINT, RESTS_INLINE_TITLE, txt_rests_line, txt_rests_list
+from src.service.vault.texts import INLINE_HINT, RESTS_EMPTY, RESTS_INLINE_TITLE, txt_rests_line, txt_rests_list
 
 
 router = Router(name="rests")
@@ -31,7 +31,7 @@ async def cmd_rests(message: Message, users: UserRepository) -> None:
     if message.chat.type == "private":
         await send_msg(message, text, reply_markup=kb_rests_inline())
     else:
-        await send_msg(message, RESTS_INLINE_HINT, reply_markup=kb_rests_inline(), only_caller=True)
+        await send_msg(message, INLINE_HINT, reply_markup=kb_rests_inline(), only_caller=True)
 
 
 @router.inline_query()

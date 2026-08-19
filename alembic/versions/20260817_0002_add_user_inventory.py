@@ -1,4 +1,4 @@
-﻿"""add_user_inventory
+"""add_user_inventory
 
 Revision ID: 20260817_0002
 Revises: 20260817_0001

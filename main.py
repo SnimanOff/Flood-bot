@@ -3,12 +3,14 @@
 from src.bot.main import start_bot
 from src.database.core import close_db, init_db
 from src.service.logger import log_app
+from src.service.vault.version import refresh_version
 
 
 async def main() -> None:
     log_app.info("app starting")
     init_db()
     log_app.info("database ready / migrations done")
+    await refresh_version()
     try:
         await start_bot()
     except Exception:

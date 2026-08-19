@@ -13,11 +13,11 @@ from src.service.receipt import send_check_file
 from src.service.sendmsg import send_msg
 from src.service.vault.goods import GOODS, Goods, rest_cost, rest_weeks
 from src.service.vault.texts import (
+    ERR_NO_MONEY,
     REST_ASK_DATE,
     REST_BAD_DATE,
-    REST_NO_MONEY,
     REST_PAST_DATE,
-    txt_rest_no_money,
+    txt_no_money,
     txt_rest_ok,
 )
 
@@ -61,7 +61,7 @@ async def msg_rest_date(message: Message, user: User, users: UserRepository, che
     if not enough:
         log_app.warning("rest no money tg_id={} cost={} balance={}", user.tg_id, cost, user.balance)
         await state.clear()
-        await send_msg(message, txt_rest_no_money(cost, user.balance))
+        await send_msg(message, txt_no_money(cost, user.balance))
         return
 
     try:
@@ -69,7 +69,7 @@ async def msg_rest_date(message: Message, user: User, users: UserRepository, che
     except UserNotFound:
         log_app.error("rest charge UserNotFound tg_id={}", user.tg_id)
         await state.clear()
-        await send_msg(message, REST_NO_MONEY)
+        await send_msg(message, ERR_NO_MONEY)
         return
 
     try:
@@ -81,7 +81,7 @@ async def msg_rest_date(message: Message, user: User, users: UserRepository, che
         except UserNotFound:
             log_app.error("rest refund failed UserNotFound tg_id={}", user.tg_id)
         await state.clear()
-        await send_msg(message, REST_NO_MONEY)
+        await send_msg(message, ERR_NO_MONEY)
         return
 
     await state.clear()

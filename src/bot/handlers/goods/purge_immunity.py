@@ -1,4 +1,4 @@
-﻿from aiogram import F, Router
+from aiogram import F, Router
 from aiogram.types import CallbackQuery
 
 from src.database.models import User
@@ -8,7 +8,7 @@ from src.service.logger import log_app, log_fin
 from src.service.receipt import send_check_file
 from src.service.sendmsg import send_msg
 from src.service.vault.goods import GOODS, Goods
-from src.service.vault.texts import PURGE_NO_MONEY, txt_purge_ok
+from src.service.vault.texts import ERR_NO_MONEY, txt_purge_ok
 
 router = Router(name="purge_immunity")
 
@@ -21,14 +21,14 @@ async def clbck_shop_buy_purge(callback: CallbackQuery, user: User, users: UserR
 
     if not await users.check_money(user, cost):
         log_app.warning("purge no money tg_id={} cost={} balance={}", user.tg_id, cost, user.balance)
-        await callback.answer(PURGE_NO_MONEY, show_alert=True)
+        await callback.answer(ERR_NO_MONEY, show_alert=True)
         return
 
     try:
         updated = await users.add_balance(user.tg_id, -cost)
     except UserNotFound:
         log_app.error("purge charge UserNotFound tg_id={}", user.tg_id)
-        await callback.answer(PURGE_NO_MONEY, show_alert=True)
+        await callback.answer(ERR_NO_MONEY, show_alert=True)
         return
 
     try:
@@ -39,7 +39,7 @@ async def clbck_shop_buy_purge(callback: CallbackQuery, user: User, users: UserR
             await users.add_balance(user.tg_id, cost)
         except UserNotFound:
             log_app.error("purge refund failed UserNotFound tg_id={}", user.tg_id)
-        await callback.answer(PURGE_NO_MONEY, show_alert=True)
+        await callback.answer(ERR_NO_MONEY, show_alert=True)
         return
 
     qty = (updated.inventory or {}).get(str(Goods.PURGE_IMMUNITY), 1)

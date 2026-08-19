@@ -1,4 +1,4 @@
-﻿import json
+import json
 from datetime import timedelta
 from html import escape
 
@@ -16,16 +16,16 @@ from src.service.sendmsg import send_msg
 from src.service.vault.media import BALANCE_ASK_MEDIA, BALANCE_SENT_MEDIA
 from src.service.vault.roles import Role
 from src.service.vault.texts import (
-    BALANCE_ALREADY,
     BALANCE_ASK_AMOUNT,
     BALANCE_ASK_PROOF,
     BALANCE_NEED_INT,
     BALANCE_NEED_POSITIVE,
-    BALANCE_NO_RIGHTS,
     BALANCE_PROFILE,
     BALANCE_SENT,
     BALANCE_STATUS_NO,
     BALANCE_STATUS_OK,
+    ERR_ALREADY,
+    ERR_NO_RIGHTS,
     txt_balance_admin,
     txt_balance_cd,
     txt_balance_user_no,
@@ -199,7 +199,7 @@ async def msg_balance_proof(message: Message, user: User, users: UserRepository,
 async def clbck_bal_ok(callback: CallbackQuery, user: User, users: UserRepository, money_requests: MoneyRequestRepository, bot: Bot):
     if user.role < Role.OWNER:
         log_app.warning("bal_ok denied tg_id={}", user.tg_id)
-        await callback.answer(BALANCE_NO_RIGHTS, show_alert=True)
+        await callback.answer(ERR_NO_RIGHTS, show_alert=True)
         return
 
     parts = callback.data.split(":")
@@ -209,10 +209,10 @@ async def clbck_bal_ok(callback: CallbackQuery, user: User, users: UserRepositor
     try:
         req = await money_requests.resolve(request_id, "ok")
     except MoneyRequestNotFound:
-        await callback.answer(BALANCE_ALREADY, show_alert=True)
+        await callback.answer(ERR_ALREADY, show_alert=True)
         return
     except MoneyRequestAlreadyResolved:
-        await callback.answer(BALANCE_ALREADY, show_alert=True)
+        await callback.answer(ERR_ALREADY, show_alert=True)
         return
 
     try:
@@ -233,7 +233,7 @@ async def clbck_bal_ok(callback: CallbackQuery, user: User, users: UserRepositor
 async def clbck_bal_no(callback: CallbackQuery, user: User, users: UserRepository, money_requests: MoneyRequestRepository, bot: Bot):
     if user.role < Role.OWNER:
         log_app.warning("bal_no denied tg_id={}", user.tg_id)
-        await callback.answer(BALANCE_NO_RIGHTS, show_alert=True)
+        await callback.answer(ERR_NO_RIGHTS, show_alert=True)
         return
 
     parts = callback.data.split(":")
@@ -243,10 +243,10 @@ async def clbck_bal_no(callback: CallbackQuery, user: User, users: UserRepositor
     try:
         req = await money_requests.resolve(request_id, "no")
     except MoneyRequestNotFound:
-        await callback.answer(BALANCE_ALREADY, show_alert=True)
+        await callback.answer(ERR_ALREADY, show_alert=True)
         return
     except MoneyRequestAlreadyResolved:
-        await callback.answer(BALANCE_ALREADY, show_alert=True)
+        await callback.answer(ERR_ALREADY, show_alert=True)
         return
 
     await update_admin_messages(bot, req, BALANCE_STATUS_NO)

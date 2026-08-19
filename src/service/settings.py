@@ -10,6 +10,9 @@ class Settings(BaseSettings):
 
     database: str
     bot: str
+    github_repo: str = ""
+    github_token: str | None = None
+    github_branch: str = "main"
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",

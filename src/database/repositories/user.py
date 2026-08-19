@@ -1,4 +1,4 @@
-﻿from datetime import datetime, timezone, timedelta, date
+from datetime import datetime, timezone, timedelta, date
 
 from sqlalchemy import select, insert, or_
 from sqlalchemy.ext.asyncio import AsyncSession
