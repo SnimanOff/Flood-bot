@@ -13,7 +13,7 @@ def kb_shop(goods: list, page: int = 0) -> InlineKeyboardMarkup:
     chunk = goods[page * 4 : (page + 1) * 4]
 
     for good in chunk:
-        builder.button(text=good["title"], callback_data=f"shop_select:{good['id']}", style="primary")
+        builder.button(text=good["title"], callback_data=f"shop_select:{good['id']}", style="success")
 
     builder.adjust(2)
 

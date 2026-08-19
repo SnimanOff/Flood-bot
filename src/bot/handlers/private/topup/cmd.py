@@ -23,12 +23,12 @@ from src.service.vault.texts import (
     BALANCE_NEED_POSITIVE,
     BALANCE_PROFILE,
     BALANCE_SENT,
-    BALANCE_STATUS_NO,
-    BALANCE_STATUS_OK,
     ERR_ALREADY,
     ERR_NO_RIGHTS,
     txt_balance_admin,
     txt_balance_cd,
+    txt_balance_status_no,
+    txt_balance_status_ok,
     txt_balance_user_no,
     txt_balance_user_ok,
     txt_cd_hm,
@@ -234,7 +234,8 @@ async def clbck_bal_ok(callback: CallbackQuery, user: User, users: UserRepositor
     except UserNotFound:
         log_app.error("bal_ok UserNotFound user_tg_id={} request_id={}", req.user_tg_id, request_id)
 
-    await update_admin_messages(bot, req, BALANCE_STATUS_OK)
+    who = callback.from_user.full_name or callback.from_user.username or str(user.tg_id)
+    await update_admin_messages(bot, req, txt_balance_status_ok(who, user.tg_id))
 
     try:
         await bot.send_message(req.user_tg_id, txt_balance_user_ok(req.amount), parse_mode="HTML")
@@ -264,7 +265,8 @@ async def clbck_bal_no(callback: CallbackQuery, user: User, users: UserRepositor
         await callback.answer(ERR_ALREADY, show_alert=True)
         return
 
-    await update_admin_messages(bot, req, BALANCE_STATUS_NO)
+    who = callback.from_user.full_name or callback.from_user.username or str(user.tg_id)
+    await update_admin_messages(bot, req, txt_balance_status_no(who, user.tg_id))
 
     try:
         await bot.send_message(req.user_tg_id, txt_balance_user_no(req.amount), parse_mode="HTML")

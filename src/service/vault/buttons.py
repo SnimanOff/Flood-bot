@@ -1,6 +1,6 @@
 BTN_SHOP = "Магазин"
 BTN_TOPUP = "Пополнить"
-BTN_MY_ITEMS = "Мои награды"
+BTN_MY_ITEMS = "Инвентарь"
 BTN_SUPPORT = "Поддержка"
 BTN_BUY = "Купить"
 BTN_BACK = "<"

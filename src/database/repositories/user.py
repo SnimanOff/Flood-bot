@@ -204,6 +204,17 @@ class UserRepository:
         log_fin.info("rest set tg_id={} until={}", tg_id, until)
         return user
 
+    async def clear_rest(self, tg_id: int) -> User:
+        user = await self.get_by_tg_id(tg_id)
+
+        if user is None:
+            raise UserNotFound(tg_id)
+
+        user.rest_until = None
+        await self._session.flush()
+        log_fin.info("rest cleared tg_id={}", tg_id)
+        return user
+
     async def add_inventory(self, tg_id: int, good_id: str, qty: int = 1) -> User:
         user = await self.get_by_tg_id(tg_id)
         if user is None:

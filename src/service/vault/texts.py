@@ -1,4 +1,4 @@
-# ---------------- common ----------------
+﻿# ---------------- common ----------------
 ERR_NO_RIGHTS = "Недостаточно прав"
 ERR_NO_MONEY = "Недостаточно средств"
 ERR_ALREADY = "Уже обработано"
@@ -48,16 +48,17 @@ def txt_help_body() -> str:
         f"  /setrest 123456 25.12.2027\n"
         f"  reply: /setrest 25.12.2027\n"
         f"/unpurge - снять пощаду\n"
+        f"/rmrest - снять рест (список)\n"
         f"\n"
         f"<b>рут</b>\n"
         f"/setrole id роль - user/moderator/admin/owner/root\n"
         f"  /setrole 123456 owner\n"
         f"\n"
         f"<b>Личка</b>\n"
-        f"Магазин, пополнить, мои награды - после /start\n"
+        f"Магазин, пополнить, инвентарь - после /start\n"
         f"\n"
         f"<b>Группа</b>\n"
-        f"Пиши команды: /gm /setrest /unpurge /setrole\n"
+        f"Пиши команды: /gm /setrest /unpurge /rmrest /setrole\n"
         f"Ответ виден только тебе\n"
         f"/rests - список рестов"
     )
@@ -83,9 +84,17 @@ BALANCE_NEED_INT = "Введите целое число"
 BALANCE_NEED_POSITIVE = "Сумма должна быть больше 0"
 BALANCE_ASK_PROOF = "Пришлите текст заявки или одно фото с подписью"
 BALANCE_SENT = "Заявка отправлена"
-BALANCE_STATUS_OK = "\n\nПринято"
-BALANCE_STATUS_NO = "\n\nОтказано"
 BALANCE_PROFILE = "профиль"
+
+
+def txt_balance_status_ok(who: str, tg_id: int) -> str:
+    from html import escape
+    return f"\n\nПринято\nКем: <b>{escape(who)}</b> (<code>{tg_id}</code>)"
+
+
+def txt_balance_status_no(who: str, tg_id: int) -> str:
+    from html import escape
+    return f"\n\nОтказано\nКем: <b>{escape(who)}</b> (<code>{tg_id}</code>)"
 
 
 def txt_cd_hm(hours, minutes) -> str:
@@ -185,6 +194,24 @@ def txt_rests_list(lines: list[str]) -> str:
     if not lines:
         return RESTS_EMPTY
     return "Активные ресты:\n\n" + "\n".join(lines)
+
+
+# ---------------- rmrest ----------------
+RMREST_EMPTY = "Активных рестов нет"
+
+
+def txt_rmrest_header(page: int, total: int, count: int) -> str:
+    return f"<b>Снять рест</b>\nВсего: <b>{count}</b>\nСтр. {page + 1}/{total}"
+
+
+def txt_rmrest_btn(username: str | None, tg_id: int, until_str: str) -> str:
+    name = f"@{username}" if username else str(tg_id)
+    return f"{name} · {until_str}"
+
+
+def txt_rmrest_ok(tg_id: int, username: str | None) -> str:
+    who = f"@{username}" if username else str(tg_id)
+    return f"Рест снят с <b>{who}</b>\nID: <code>{tg_id}</code>"
 
 
 # ---------------- unpurge ----------------

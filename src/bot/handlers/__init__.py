@@ -13,6 +13,7 @@ from src.bot.handlers.inline.help import router as inline_help_router
 from src.bot.handlers.inline.unpurge import router as inline_unpurge_router
 from src.bot.handlers.public.rests.cmd import router as rests_router
 from src.bot.handlers.public.unpurge.cmd import router as unpurge_router
+from src.bot.handlers.public.rmrest.cmd import router as rmrest_router
 from src.bot.handlers.public.help.cmd import router as help_router
 from src.bot.handlers.shop_buy.rest import router as rest_buy_router
 from src.bot.handlers.shop_buy.purge_immunity import router as purge_buy_router
@@ -35,5 +36,6 @@ def setup_routers() -> Router:
     root.include_router(inline_unpurge_router)
     root.include_router(rests_router)
     root.include_router(unpurge_router)
+    root.include_router(rmrest_router)
     root.include_router(help_router)
     return root
