@@ -15,6 +15,7 @@ from src.service.vault.texts import (
     SETREST_BAD_DATE,
     SETREST_CANCELLED,
     SETREST_INLINE_TITLE,
+    SETREST_NEED_DATE,
     SETREST_PAST,
     SETREST_USAGE,
     SETREST_USER_NOT_FOUND,
@@ -61,12 +62,22 @@ async def inline_setrest(query: InlineQuery, user: User, users: UserRepository):
         await query.answer([], cache_time=1, is_personal=True)
         return
 
+    if len(parts) == 1:
+        log_app.info("inline_setrest usage tg_id={}", query.from_user.id)
+        await query.answer([_article(SETREST_INLINE_TITLE, SETREST_USAGE, SETREST_USAGE)], cache_time=1, is_personal=True)
+        return
+
+    if len(parts) == 2:
+        log_app.info("inline_setrest need date tg_id={}", query.from_user.id)
+        await query.answer([_article(SETREST_INLINE_TITLE, SETREST_NEED_DATE, SETREST_NEED_DATE)], cache_time=1, is_personal=True)
+        return
+
     if len(parts) != 3:
         log_app.info("inline_setrest usage tg_id={}", query.from_user.id)
         await query.answer([_article(SETREST_INLINE_TITLE, SETREST_USAGE, SETREST_USAGE)], cache_time=1, is_personal=True)
         return
 
-    token, date_raw = parts[1], parts[2]
+    token, date_raw = parts[1].lstrip("@"), parts[2]
 
     try:
         until = datetime.strptime(date_raw, "%d.%m.%Y").date()

@@ -6,6 +6,7 @@ from src.bot.handlers.private.topup.cmd import router as topup_router
 from src.bot.handlers.private.my_items.cmd import router as my_items_router
 from src.bot.handlers.private.setrole.cmd import router as setrole_router
 from src.bot.handlers.public.give_money.cmd import router as give_money_router
+from src.bot.handlers.public.setrest.cmd import router as setrest_router
 from src.bot.handlers.inline.menu import router as inline_menu_router
 from src.bot.handlers.inline.rests import router as inline_rests_router
 from src.bot.handlers.inline.help import router as inline_help_router
@@ -28,6 +29,7 @@ def setup_routers() -> Router:
     root.include_router(my_items_router)
     root.include_router(setrole_router)
     root.include_router(give_money_router)
+    root.include_router(setrest_router)
     root.include_router(inline_menu_router)
     root.include_router(inline_rests_router)
     root.include_router(inline_help_router)

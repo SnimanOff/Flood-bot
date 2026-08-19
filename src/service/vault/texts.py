@@ -45,7 +45,8 @@ def txt_help_body() -> str:
         f"<b>Группа / inline</b> (без админ-прав бота)\n"
         f"@bot rests — активные ресты\n"
         f"@bot unpurge — снять пощаду (OWNER+)\n"
-        f"@bot setrest id|@user ДД.ММ.ГГГГ — рест (OWNER+)\n"
+        f"@bot setrest id|username ДД.ММ.ГГГГ — рест (OWNER+), username БЕЗ @\n"
+        f"/setrest <id|username> ДД.ММ.ГГГГ — то же (OWNER+)\n"
         f"@bot help — эта справка\n"
         f"\n"
         f"<b>Команды</b>\n"
@@ -229,7 +230,10 @@ def txt_my_items(inv_block: str, rest_block: str) -> str:
 
 # ---------------- setrest ----------------
 SETREST_INLINE_TITLE = "Установить рест"
-SETREST_USAGE = "setrest &lt;id|@user&gt; ДД.ММ.ГГГГ"
+SETREST_USAGE = "Без второго @:\nsetrest id ДД.ММ.ГГГГ\nsetrest username ДД.ММ.ГГГГ\n\nПример:\nsetrest QwertyGeny 25.12.2027\nsetrest 123456789 25.12.2027"
+SETREST_NEED_USER = "Укажи id или username (без @)"
+SETREST_NEED_DATE = "Укажи дату ДД.ММ.ГГГГ"
+SETREST_CMD_USAGE = "Использование:\n/setrest <id|username> ДД.ММ.ГГГГ\nили reply: /setrest ДД.ММ.ГГГГ\nusername без @"
 SETREST_BAD_DATE = "Формат даты: ДД.ММ.ГГГГ"
 SETREST_PAST = "Дата не может быть в прошлом"
 SETREST_USER_NOT_FOUND = "Пользователь не найден"
