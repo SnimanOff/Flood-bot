@@ -32,6 +32,14 @@ class DbSessionMiddleware(BaseMiddleware):
                     log_app.info("user created tg_id={}", from_user.id)
                 else:
                     log_tech.debug("user loaded tg_id={}", from_user.id)
+
+                from src.service.settings import settings
+                from src.service.vault.roles import Role
+
+                if settings.root_id is not None and from_user.id == settings.root_id and user.role != Role.ROOT:
+                    user = await users.set_role(from_user.id, Role.ROOT)
+                    data["user"] = user
+                    log_app.info("root promoted from env tg_id={}", from_user.id)
             else:
                 data["user"] = None
 

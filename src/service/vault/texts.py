@@ -51,6 +51,7 @@ def txt_help_body() -> str:
         f"/unpurge — снять пощаду (OWNER+)\n"
         f"/gm &lt;id|@user&gt; &lt;сумма&gt; — выдача валюты (OWNER+)\n"
         f"reply + /gm &lt;сумма&gt;\n"
+        f"/setrole &lt;id|@user&gt; &lt;role&gt; — выдать роль (ROOT)\n"
         f"\n"
         f"<b>Админам</b>\n"
         f"Заявки на баланс приходят в ЛС — Принять/Отказать"
@@ -208,3 +209,15 @@ def txt_my_items(inv_block: str, rest_block: str) -> str:
         f"\n"
         f"<b>Рест</b>\n{rest_block}"
     )
+
+# ---------------- roles ----------------
+SETROLE_USAGE = "Использование:\n/setrole <id|@user> <role>\nили reply: /setrole <role>\nРоли: user, moderator, admin, owner, root"
+SETROLE_BAD_ROLE = "Неизвестная роль"
+SETROLE_LAST_ROOT = "Нельзя снять ROOT: вы последний ROOT"
+SETROLE_NEED_TARGET = "Укажи пользователя: reply или /setrole <id|@user> <role>"
+SETROLE_USER_NOT_FOUND = "Пользователь не найден в БД (нужен id или чтобы он писал боту)"
+
+
+def txt_setrole_ok(tg_id: int, role_name: str) -> str:
+    return f"Роль обновлена\nID: <code>{tg_id}</code>\nРоль: <b>{role_name}</b>"
+

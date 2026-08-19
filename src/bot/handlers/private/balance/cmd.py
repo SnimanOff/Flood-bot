@@ -13,7 +13,9 @@ from src.database.repositories import MoneyRequestRepository, UserRepository
 from src.service.errors import MoneyRequestAlreadyResolved, MoneyRequestNotFound, UserNotFound
 from src.service.logger import log_app, log_tech
 from src.service.sendmsg import send_msg
-from src.service.vault.media import BALANCE_ASK_MEDIA, BALANCE_SENT_MEDIA
+from src.bot.handlers.private.start.keyboard import kb_start
+from src.service.vault.media import BALANCE_ASK_MEDIA, BALANCE_SENT_MEDIA, START_MEDIA
+from src.service.vault.version import get_version_info
 from src.service.vault.roles import Role
 from src.service.vault.texts import (
     BALANCE_ASK_AMOUNT,
@@ -33,6 +35,7 @@ from src.service.vault.texts import (
     txt_cd_hm,
     txt_cd_ms,
     txt_cd_s,
+    txt_start_hello,
 )
 
 router = Router(name="balance")
@@ -191,7 +194,11 @@ async def msg_balance_proof(message: Message, user: User, users: UserRepository,
     await money_requests.set_notifies(req.id, notifies)
 
     log_app.info("balance request submitted tg_id={} request_id={} amount={}", tg_id, req.id, amount)
-    await send_msg(message, BALANCE_SENT, media=BALANCE_SENT_MEDIA)
+    version, updated = get_version_info()
+    name = message.from_user.first_name or "друг"
+    menu = txt_start_hello(name, version, updated)
+    text = f"{BALANCE_SENT}\n\n{menu}"
+    await send_msg(message, text, media=START_MEDIA or BALANCE_SENT_MEDIA, reply_markup=kb_start())
 
 # ---------------- решение админа ----------------
 

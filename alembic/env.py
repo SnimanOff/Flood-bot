@@ -1,4 +1,5 @@
-import asyncio
+﻿import asyncio
+import concurrent.futures
 from logging.config import fileConfig
 
 from alembic import context
@@ -49,7 +50,13 @@ async def run_async_migrations() -> None:
 
 
 def run_migrations_online() -> None:
-    asyncio.run(run_async_migrations())
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        asyncio.run(run_async_migrations())
+        return
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+        pool.submit(lambda: asyncio.run(run_async_migrations())).result()
 
 
 if context.is_offline_mode():

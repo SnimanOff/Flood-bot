@@ -7,9 +7,6 @@ from src.service.vault.version import refresh_version
 
 
 async def main() -> None:
-    log_app.info("app starting")
-    init_db()
-    log_app.info("database ready / migrations done")
     await refresh_version()
     try:
         await start_bot()
@@ -23,6 +20,9 @@ async def main() -> None:
 
 if __name__ == "__main__":
     try:
+        log_app.info("app starting")
+        init_db()
+        log_app.info("database ready / migrations done")
         asyncio.run(main())
     except Exception:
         log_app.exception("process exited with error")

@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     github_repo: str = ""
     github_token: str | None = None
     github_branch: str = "main"
+    root_id: int | None = None  # env ROOT_ID
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",

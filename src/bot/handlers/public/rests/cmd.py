@@ -1,4 +1,4 @@
-from uuid import uuid4
+﻿from uuid import uuid4
 
 from aiogram import Router
 from aiogram.filters import Command
@@ -18,7 +18,9 @@ router = Router(name="rests")
 def format_rests(users: list[User]) -> str:
     lines = []
     for u in users:
-        until_str = u.rest_until.strftime("%d.%m.%Y") if u.rest_until else "-"
+        if u.rest_until is None:
+            continue
+        until_str = u.rest_until.strftime("%d.%m.%Y")
         lines.append(txt_rests_line(u.tg_id, u.username, until_str))
     return txt_rests_list(lines)
 
@@ -37,7 +39,7 @@ async def cmd_rests(message: Message, users: UserRepository) -> None:
 @router.inline_query()
 async def inline_rests(query: InlineQuery, users: UserRepository) -> None:
     q = (query.query or "").strip().lower()
-    if q not in ("", "rests", "рест", "ресты"):
+    if q not in ("rests", "рест", "ресты"):
         return
     active = await users.get_active_rests()
     log_app.info("inline_rests tg_id={} count={}", query.from_user.id, len(active))

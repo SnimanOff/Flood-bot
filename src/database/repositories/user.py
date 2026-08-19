@@ -1,6 +1,6 @@
-from datetime import datetime, timezone, timedelta, date
+﻿from datetime import datetime, timezone, timedelta, date
 
-from sqlalchemy import select, insert, or_
+from sqlalchemy import select, insert, or_, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.models import User
@@ -110,6 +110,40 @@ class UserRepository:
         owners = list(stmt.scalars().all())
         log_tech.debug("get_owners count={}", len(owners))
         return owners
+
+    async def count_by_role(self, role: Role) -> int:
+        stmt = await self._session.execute(
+            select(func.count()).select_from(User).where(User.role == role)
+        )
+        count = int(stmt.scalar_one())
+        log_tech.debug("count_by_role role={} count={}", role, count)
+        return count
+
+    async def set_role(self, tg_id: int, role: Role) -> User:
+        user = await self.get_by_tg_id(tg_id)
+        if user is None:
+            raise UserNotFound(tg_id)
+        before = user.role
+        user.role = role
+        await self._session.flush()
+        log_fin.info("role set tg_id={} {} -> {}", tg_id, before, role)
+        return user
+
+    async def has_any_root(self) -> bool:
+        stmt = await self._session.execute(
+            select(User.id).where(User.role == Role.ROOT).limit(1)
+        )
+        found = stmt.scalar_one_or_none() is not None
+        log_tech.debug("has_any_root={}", found)
+        return found
+
+    async def has_other_root(self, tg_id: int) -> bool:
+        stmt = await self._session.execute(
+            select(User.id).where(User.role == Role.ROOT, User.tg_id != tg_id).limit(1)
+        )
+        found = stmt.scalar_one_or_none() is not None
+        log_tech.debug("has_other_root tg_id={} found={}", tg_id, found)
+        return found
 
     async def set_last_query_money(self, tg_id: int, when: datetime | None = None) -> User:
         """
@@ -236,4 +270,3 @@ class UserRepository:
         await self._session.flush()
         log_fin.info("inventory take tg_id={} good={} qty={} left={}", tg_id, key, qty, left)
         return user
-
