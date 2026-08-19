@@ -3,14 +3,14 @@ from datetime import datetime, timezone
 from aiogram import F, Router
 from aiogram.types import CallbackQuery
 
-from src.bot.handlers.private.inventory.keyboard import kb_my_items
+from src.bot.handlers.private.my_items.keyboard import kb_my_items
 from src.database.models import User
 from src.service.logger import log_app
 from src.service.sendmsg import send_msg
 from src.service.vault.goods import GOODS, get_good
 from src.service.vault.texts import MY_ITEMS_INV_EMPTY, MY_ITEMS_REST_NONE, txt_my_items, txt_my_items_inventory_line, txt_my_items_rest_active
 
-router = Router(name="inventory")
+router = Router(name="my_items")
 
 
 def build_my_items_text(user: User) -> str:

@@ -19,7 +19,7 @@ from src.service.vault.texts import (
     txt_setrole_ok,
 )
 
-router = Router(name="admin_roles")
+router = Router(name="setrole")
 
 ROLE_MAP = {
     "user": Role.USER,

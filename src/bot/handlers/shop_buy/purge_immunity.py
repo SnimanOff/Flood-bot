@@ -11,7 +11,7 @@ from src.service.sendmsg import send_msg
 from src.service.vault.goods import GOODS, Goods, get_goods
 from src.service.vault.texts import ERR_NO_MONEY, SHOP_TITLE, txt_purge_ok
 
-router = Router(name="purge_immunity")
+router = Router(name="shop_buy_purge")
 
 
 @router.callback_query(F.data == f"shop_buy:{Goods.PURGE_IMMUNITY}", F.message.chat.type == "private")

@@ -7,7 +7,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
-from src.bot.handlers.private.balance.keyboard import kb_admin_request
+from src.bot.handlers.private.topup.keyboard import kb_admin_request
 from src.bot.handlers.private.start.keyboard import kb_start
 from src.database.models import MoneyRequest, User
 from src.database.repositories import MoneyRequestRepository, UserRepository
@@ -38,7 +38,7 @@ from src.service.vault.texts import (
 )
 from src.service.vault.version import get_version_info
 
-router = Router(name="balance")
+router = Router(name="topup")
 
 
 class BalanceRequest(StatesGroup):

@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
-from src.bot.handlers.goods.keyboard import kb_rest_confirm
+from src.bot.handlers.shop_buy.keyboard import kb_rest_confirm
 from src.bot.handlers.private.shop.keyboard import kb_shop
 from src.database.models import User
 from src.database.repositories import CheckRepository, UserRepository
@@ -28,7 +28,7 @@ from src.service.vault.texts import (
     txt_rest_ok,
 )
 
-router = Router(name="rest")
+router = Router(name="shop_buy_rest")
 
 
 class RestBuy(StatesGroup):

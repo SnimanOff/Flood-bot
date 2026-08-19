@@ -19,7 +19,7 @@ from src.service.vault.texts import (
     txt_gm_ok,
 )
 
-router = Router(name="gm")
+router = Router(name="give_money")
 
 
 def parse_amount(raw: str) -> int | None:
