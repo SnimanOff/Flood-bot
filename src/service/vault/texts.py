@@ -1,4 +1,4 @@
-﻿# ---------------- common ----------------
+# ---------------- common ----------------
 ERR_NO_RIGHTS = "Недостаточно прав"
 ERR_NO_MONEY = "Недостаточно средств"
 ERR_ALREADY = "Уже обработано"
@@ -32,34 +32,7 @@ HELP_INLINE_TITLE = "Справка"
 
 def txt_help_body() -> str:
     from src.service.vault.version import get_cached_version
-    ver = get_cached_version()
-    return (
-        f"<b>Справка бота</b> <code>v{ver}</code>\n"
-        f"\n"
-        f"<b>Личка</b>\n"
-        f"/start - меню (магазин, пополнить, награды)\n"
-        f"Магазин - рест (цена за неделю), пощада\n"
-        f"Пополнить - заявка на валюту (КД 24ч, текст или фото)\n"
-        f"Мои награды - инвентарь + рест\n"
-        f"\n"
-        f"<b>Группа / inline</b> (без админ-прав бота)\n"
-        f"@bot rests - активные ресты\n"
-        f"@bot unpurge - снять пощаду (влд)\n"
-        f"@bot setrest id|username ДД.ММ.ГГГГ - рест (влд), username БЕЗ @\n"
-        f"/setrest &lt;id|username&gt; ДД.ММ.ГГГГ - то же (влд)\n"
-        f"@bot help - эта справка\n"
-        f"\n"
-        f"<b>Команды</b>\n"
-        f"/help - справка (в группе только вам)\n"
-        f"/rests - ресты\n"
-        f"/unpurge - снять пощаду (влд)\n"
-        f"/gm &lt;id|@user&gt; &lt;сумма&gt; - выдача валюты (влд)\n"
-        f"reply + /gm &lt;сумма&gt;\n"
-        f"/setrole &lt;id|@user&gt; &lt;role&gt; - выдать роль (рут)\n"
-        f"\n"
-        f"<b>Админам</b>\n"
-        f"Заявки на баланс приходят в ЛС - Принять/Отказать"
-    )
+    return f"<b>Справка</b> <code>v{get_cached_version()}</code>"
 
 
 # ---------------- shop ----------------

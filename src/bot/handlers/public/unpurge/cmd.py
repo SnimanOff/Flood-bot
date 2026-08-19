@@ -3,14 +3,14 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
 from src.bot.handlers.public.unpurge.helpers import GOOD, edit_unpurge_list, plain, unpurge_text
-from src.bot.handlers.public.unpurge.keyboard import kb_unpurge, kb_unpurge_switch
+from src.bot.handlers.public.unpurge.keyboard import kb_unpurge
 from src.database.models import User
 from src.database.repositories import UserRepository
 from src.service.errors import NotEnoughInventory, UserNotFound
 from src.service.logger import log_app, log_fin
 from src.service.sendmsg import send_msg
 from src.service.vault.roles import Role
-from src.service.vault.texts import ERR_NO_RIGHTS, INLINE_HINT, UNPURGE_EMPTY, UNPURGE_FAIL, UNPURGE_NONE, txt_page, txt_unpurge_ok
+from src.service.vault.texts import ERR_NO_RIGHTS, UNPURGE_EMPTY, UNPURGE_FAIL, UNPURGE_NONE, txt_page, txt_unpurge_ok
 
 router = Router(name="unpurge")
 
@@ -24,13 +24,11 @@ async def cmd_unpurge(message: Message, user: User, users: UserRepository):
     log_app.info("/unpurge tg_id={}", user.tg_id)
     holders = await users.get_inventory_holders(GOOD)
 
-    if message.chat.type == "private":
-        if not holders:
-            await send_msg(message, UNPURGE_EMPTY, reply_markup=kb_unpurge_switch())
-        else:
-            await send_msg(message, unpurge_text(holders, 0), reply_markup=kb_unpurge(holders, 0))
-    else:
-        await send_msg(message, INLINE_HINT, reply_markup=kb_unpurge_switch(), only_caller=True)
+    if not holders:
+        await send_msg(message, UNPURGE_EMPTY, only_caller=True)
+        return
+
+    await send_msg(message, unpurge_text(holders, 0), reply_markup=kb_unpurge(holders, 0), only_caller=True)
 
 
 @router.callback_query(F.data.startswith("unpurge_page:"))

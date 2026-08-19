@@ -44,6 +44,8 @@ async def resolve_target(message: Message, users: UserRepository, token: str | N
     if not token:
         return None, GM_NEED_TARGET
 
+    token = token.lstrip("@")
+
     if token.lstrip("-").isdigit():
         tg_id = int(token)
         await users.get_or_create(tg_id)

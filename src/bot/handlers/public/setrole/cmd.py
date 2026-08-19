@@ -1,4 +1,4 @@
-from aiogram import F, Router
+from aiogram import Router
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message
 
@@ -53,6 +53,8 @@ async def resolve_target(message: Message, users: UserRepository, token: str | N
     if not token:
         return None, SETROLE_NEED_TARGET
 
+    token = token.lstrip("@")
+
     if token.lstrip("-").isdigit():
         tg_id = int(token)
         await users.get_or_create(tg_id)
@@ -66,7 +68,7 @@ async def resolve_target(message: Message, users: UserRepository, token: str | N
     return user.tg_id, None
 
 
-@router.message(Command("setrole"), F.chat.type == "private")
+@router.message(Command("setrole"))
 async def cmd_setrole(message: Message, command: CommandObject, user: User, users: UserRepository) -> None:
     log_app.info("/setrole tg_id={} args={}", message.from_user.id if message.from_user else None, command.args)
 
