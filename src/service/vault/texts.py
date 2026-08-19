@@ -32,7 +32,36 @@ HELP_INLINE_TITLE = "Справка"
 
 def txt_help_body() -> str:
     from src.service.vault.version import get_cached_version
-    return f"<b>Справка</b> <code>v{get_cached_version()}</code>"
+    ver = get_cached_version()
+    return (
+        f"<b>Справка</b> <code>v{ver}</code>\n"
+        f"\n"
+        f"<b>Для всех</b>\n"
+        f"/start - меню в личке\n"
+        f"/help - эта справка\n"
+        f"/rests - кто на ресте\n"
+        f"\n"
+        f"<b>влд</b>\n"
+        f"/gm id сумма - выдать валюту\n"
+        f"  /gm 123456 100\n"
+        f"  reply: /gm 100\n"
+        f"/setrest id ДД.ММ.ГГГГ - выдать рест\n"
+        f"  /setrest 123456 25.12.2027\n"
+        f"  reply: /setrest 25.12.2027\n"
+        f"/unpurge - снять пощаду\n"
+        f"\n"
+        f"<b>рут</b>\n"
+        f"/setrole id роль - user/moderator/admin/owner/root\n"
+        f"  /setrole 123456 owner\n"
+        f"\n"
+        f"<b>Личка</b>\n"
+        f"Магазин, пополнить, мои награды - после /start\n"
+        f"\n"
+        f"<b>Группа</b>\n"
+        f"Пиши команды: /gm /setrest /unpurge /setrole\n"
+        f"Ответ виден только тебе\n"
+        f"/rests - список рестов"
+    )
 
 
 # ---------------- shop ----------------
