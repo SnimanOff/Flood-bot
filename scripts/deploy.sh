@@ -7,3 +7,4 @@ cd docker
 docker compose --env-file ../.env up -d --build
 docker image prune -f
 docker compose --env-file ../.env ps
+docker compose --env-file ../.env logs -f --tail=100 bot
