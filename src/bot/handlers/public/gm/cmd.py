@@ -23,10 +23,8 @@ router = Router(name="gm")
 
 
 def parse_amount(raw: str) -> int | None:
-
     try:
         amount = int(raw)
-
     except ValueError:
         return None
 
@@ -37,7 +35,6 @@ def parse_amount(raw: str) -> int | None:
 
 
 async def resolve_target(message: Message, users: UserRepository, token: str | None) -> tuple[int | None, str | None]:
-
     reply_user = message.reply_to_message.from_user if message.reply_to_message else None
 
     if reply_user is not None and not reply_user.is_bot:
@@ -53,6 +50,7 @@ async def resolve_target(message: Message, users: UserRepository, token: str | N
         return tg_id, None
 
     user = await users.get_by_username(token)
+
     if user is None:
         return None, GM_USER_NOT_FOUND
 
@@ -88,6 +86,7 @@ async def cmd_gm(message: Message, command: CommandObject, user: User, users: Us
         return
 
     target_id, error = await resolve_target(message, users, None if has_reply else target_token)
+
     if error:
         await send_msg(message, error, media=GM_USAGE_MEDIA, only_caller=True)
         return

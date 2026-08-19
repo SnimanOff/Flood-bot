@@ -8,14 +8,13 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 from src.bot.handlers.private.balance.keyboard import kb_admin_request
+from src.bot.handlers.private.start.keyboard import kb_start
 from src.database.models import MoneyRequest, User
 from src.database.repositories import MoneyRequestRepository, UserRepository
 from src.service.errors import MoneyRequestAlreadyResolved, MoneyRequestNotFound, UserNotFound
 from src.service.logger import log_app, log_tech
 from src.service.sendmsg import send_msg
-from src.bot.handlers.private.start.keyboard import kb_start
 from src.service.vault.media import BALANCE_ASK_MEDIA, BALANCE_SENT_MEDIA, START_MEDIA
-from src.service.vault.version import get_version_info
 from src.service.vault.roles import Role
 from src.service.vault.texts import (
     BALANCE_ASK_AMOUNT,
@@ -37,6 +36,7 @@ from src.service.vault.texts import (
     txt_cd_s,
     txt_start_hello,
 )
+from src.service.vault.version import get_version_info
 
 router = Router(name="balance")
 
@@ -70,6 +70,7 @@ async def edit_message_content(callback_message, text, reply_markup=None):
 async def update_admin_messages(bot: Bot, request: MoneyRequest, status_line: str):
     text = request.caption + status_line
     notifies = json.loads(request.notifies or "[]")
+
     for item in notifies:
         try:
             if request.photo_file_id:
@@ -80,12 +81,11 @@ async def update_admin_messages(bot: Bot, request: MoneyRequest, status_line: st
             log_tech.warning("update_admin_messages edit fail chat_id={} message_id={}", item.get("chat_id"), item.get("message_id"))
 
 
-# ---------------- запрос средств ----------------
-
 @router.callback_query(F.data == "start_get_balance", F.message.chat.type == "private")
 async def clbck_start_get_balance(callback: CallbackQuery, user: User, users: UserRepository, state: FSMContext):
     log_app.info("get_balance start tg_id={}", callback.from_user.id)
     left = users.cd_left(user)
+
     if left is not None:
         log_app.warning("get_balance cd hit tg_id={} left={}", user.tg_id, left)
         await callback.answer(txt_balance_cd(fmt_cd(left)), show_alert=True)
@@ -94,6 +94,7 @@ async def clbck_start_get_balance(callback: CallbackQuery, user: User, users: Us
     await state.set_state(BalanceRequest.amount)
     await edit_message_content(callback.message, BALANCE_ASK_AMOUNT, reply_markup=None)
     await callback.answer()
+
 
 @router.message(BalanceRequest.amount, F.chat.type == "private")
 async def msg_balance_amount(message: Message, user: User, users: UserRepository, state: FSMContext):
@@ -111,6 +112,7 @@ async def msg_balance_amount(message: Message, user: User, users: UserRepository
         return
 
     left = users.cd_left(user)
+
     if left is not None:
         log_app.warning("balance amount cd hit tg_id={}", user.tg_id)
         await state.clear()
@@ -122,9 +124,11 @@ async def msg_balance_amount(message: Message, user: User, users: UserRepository
     log_app.info("balance amount ok tg_id={} amount={}", user.tg_id, amount)
     await send_msg(message, BALANCE_ASK_PROOF, media=BALANCE_ASK_MEDIA)
 
+
 @router.message(BalanceRequest.proof, F.chat.type == "private")
 async def msg_balance_proof(message: Message, user: User, users: UserRepository, money_requests: MoneyRequestRepository, state: FSMContext, bot: Bot):
     log_app.info("balance proof step tg_id={}", message.from_user.id)
+
     if message.photo:
         file_id = message.photo[-1].file_id
         text = message.caption or ""
@@ -137,12 +141,14 @@ async def msg_balance_proof(message: Message, user: User, users: UserRepository,
 
     data = await state.get_data()
     amount = data.get("amount")
+
     if amount is None:
         await state.clear()
         await send_msg(message, BALANCE_ASK_AMOUNT, media=BALANCE_ASK_MEDIA)
         return
 
     left = users.cd_left(user)
+
     if left is not None:
         log_app.warning("balance proof cd hit tg_id={}", user.tg_id)
         await state.clear()
@@ -153,6 +159,7 @@ async def msg_balance_proof(message: Message, user: User, users: UserRepository,
     await state.clear()
 
     tg_id = message.from_user.id
+
     if message.from_user.username:
         user_link = f'<a href="tg://user?id={tg_id}">@{escape(message.from_user.username)}</a>'
     else:
@@ -170,6 +177,7 @@ async def msg_balance_proof(message: Message, user: User, users: UserRepository,
 
     notifies: list[dict] = []
     owners = await users.get_owners()
+
     for owner in owners:
         try:
             if file_id:
@@ -200,7 +208,6 @@ async def msg_balance_proof(message: Message, user: User, users: UserRepository,
     text = f"{BALANCE_SENT}\n\n{menu}"
     await send_msg(message, text, media=START_MEDIA or BALANCE_SENT_MEDIA, reply_markup=kb_start())
 
-# ---------------- решение админа ----------------
 
 @router.callback_query(F.data.startswith("bal_ok:"), F.message.chat.type == "private")
 async def clbck_bal_ok(callback: CallbackQuery, user: User, users: UserRepository, money_requests: MoneyRequestRepository, bot: Bot):
@@ -235,6 +242,7 @@ async def clbck_bal_ok(callback: CallbackQuery, user: User, users: UserRepositor
         log_app.warning("bal_ok notify user fail user_tg_id={}", req.user_tg_id)
 
     await callback.answer()
+
 
 @router.callback_query(F.data.startswith("bal_no:"), F.message.chat.type == "private")
 async def clbck_bal_no(callback: CallbackQuery, user: User, users: UserRepository, money_requests: MoneyRequestRepository, bot: Bot):

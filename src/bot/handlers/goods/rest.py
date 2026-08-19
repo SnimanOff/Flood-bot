@@ -57,6 +57,7 @@ async def msg_rest_date(message: Message, user: User, users: UserRepository, sta
         return
 
     today = datetime.now(timezone.utc).date()
+
     if until < today:
         log_app.warning("rest past date tg_id={} raw={}", message.from_user.id, raw)
         await send_msg(message, REST_PAST_DATE)
@@ -65,11 +66,13 @@ async def msg_rest_date(message: Message, user: User, users: UserRepository, sta
     current = user.rest_until
     weeks = rest_weeks(until, current)
     cost = rest_cost(until, current)
+
     if weeks <= 0:
         await send_msg(message, REST_NO_EXTEND)
         return
 
     enough = await users.check_money(user, cost)
+
     if not enough:
         log_app.warning("rest no money tg_id={} cost={} balance={}", user.tg_id, cost, user.balance)
         await state.clear()
@@ -92,12 +95,14 @@ async def clbck_rest_yes(callback: CallbackQuery, user: User, users: UserReposit
 
     weeks2 = rest_weeks(until, user.rest_until)
     cost2 = rest_cost(until, user.rest_until)
+
     if weeks2 <= 0:
         await state.clear()
         await callback.answer(REST_NO_EXTEND, show_alert=True)
         return
 
     cost, weeks = cost2, weeks2
+
     if not await users.check_money(user, cost):
         await state.clear()
         await callback.answer(ERR_NO_MONEY, show_alert=True)
@@ -116,10 +121,12 @@ async def clbck_rest_yes(callback: CallbackQuery, user: User, users: UserReposit
         await users.set_rest(user.tg_id, until)
     except UserNotFound:
         log_fin.warning("rest refund tg_id={} cost={}", user.tg_id, cost)
+
         try:
             await users.add_balance(user.tg_id, cost)
         except UserNotFound:
             log_app.error("rest refund failed UserNotFound tg_id={}", user.tg_id)
+
         await state.clear()
         await callback.answer(ERR_NO_MONEY, show_alert=True)
         return

@@ -45,24 +45,31 @@ def parse_role(raw: str) -> Role | None:
 
 async def resolve_target(message: Message, users: UserRepository, token: str | None) -> tuple[int | None, str | None]:
     reply_user = message.reply_to_message.from_user if message.reply_to_message else None
+
     if reply_user is not None and not reply_user.is_bot:
         await users.get_or_create(reply_user.id, reply_user.username)
         return reply_user.id, None
+
     if not token:
         return None, SETROLE_NEED_TARGET
+
     if token.lstrip("-").isdigit():
         tg_id = int(token)
         await users.get_or_create(tg_id)
         return tg_id, None
+
     user = await users.get_by_username(token)
+
     if user is None:
         return None, SETROLE_USER_NOT_FOUND
+
     return user.tg_id, None
 
 
 @router.message(Command("setrole"), F.chat.type == "private")
 async def cmd_setrole(message: Message, command: CommandObject, user: User, users: UserRepository) -> None:
     log_app.info("/setrole tg_id={} args={}", message.from_user.id if message.from_user else None, command.args)
+
     if user.role < Role.ROOT:
         log_app.warning("setrole denied tg_id={} role={}", user.tg_id, user.role)
         await send_msg(message, ERR_NO_RIGHTS, only_caller=True)
@@ -82,11 +89,13 @@ async def cmd_setrole(message: Message, command: CommandObject, user: User, user
         return
 
     new_role = parse_role(role_raw)
+
     if new_role is None:
         await send_msg(message, SETROLE_BAD_ROLE, only_caller=True)
         return
 
     target_id, error = await resolve_target(message, users, None if has_reply else target_token)
+
     if error:
         await send_msg(message, error, only_caller=True)
         return

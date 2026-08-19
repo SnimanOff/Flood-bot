@@ -36,10 +36,12 @@ async def clbck_shop_buy_purge(callback: CallbackQuery, user: User, users: UserR
         updated = await users.add_inventory(user.tg_id, str(Goods.PURGE_IMMUNITY), 1)
     except UserNotFound:
         log_fin.warning("purge refund tg_id={} cost={}", user.tg_id, cost)
+
         try:
             await users.add_balance(user.tg_id, cost)
         except UserNotFound:
             log_app.error("purge refund failed UserNotFound tg_id={}", user.tg_id)
+
         await callback.answer(ERR_NO_MONEY, show_alert=True)
         return
 

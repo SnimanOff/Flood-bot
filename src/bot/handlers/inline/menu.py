@@ -1,10 +1,10 @@
-﻿from uuid import uuid4
+from uuid import uuid4
 
 from aiogram import Router
 from aiogram.types import InlineQuery, InlineQueryResultArticle, InputTextMessageContent
 
-from src.bot.handlers.public.rests.cmd import format_rests
-from src.bot.handlers.public.unpurge.cmd import unpurge_text, GOOD
+from src.bot.handlers.public.rests.format import format_rests
+from src.bot.handlers.public.unpurge.helpers import GOOD, unpurge_text
 from src.bot.handlers.public.unpurge.keyboard import kb_unpurge
 from src.database.models import User
 from src.database.repositories import UserRepository
@@ -26,6 +26,7 @@ router = Router(name="inline_menu")
 @router.inline_query()
 async def inline_menu(query: InlineQuery, user: User, users: UserRepository):
     q = (query.query or "").strip().lower()
+
     if q != "":
         return
 
