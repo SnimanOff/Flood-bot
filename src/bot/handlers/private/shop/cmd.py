@@ -6,7 +6,7 @@ from src.database.models import User
 from src.service.logger import log_app
 from src.service.sendmsg import send_msg
 from src.service.vault.goods import get_goods, get_good
-from src.service.vault.texts import SHOP_UNAVAILABLE, txt_good_card, txt_page
+from src.service.vault.texts import SHOP_TITLE, SHOP_UNAVAILABLE, txt_good_card, txt_page
 
 
 router = Router(name="shop")
@@ -29,7 +29,7 @@ async def clbck_shop_page(callback: CallbackQuery, user: User):
     page = int(callback.data.split(":")[1])
     log_app.info("shop_page tg_id={} page={}", callback.from_user.id, page)
 
-    await callback.message.edit_reply_markup(reply_markup=kb_shop(get_goods(), page))
+    await send_msg(callback.message, SHOP_TITLE, reply_markup=kb_shop(get_goods(), page), edit=True)
     await callback.answer()
 
 

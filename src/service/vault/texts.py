@@ -59,6 +59,7 @@ def txt_help_body() -> str:
 
 
 # ---------------- shop ----------------
+SHOP_TITLE = "Магазин"
 SHOP_UNAVAILABLE = "Товар недоступен"
 
 

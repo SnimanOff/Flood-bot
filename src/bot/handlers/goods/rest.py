@@ -5,18 +5,20 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
+from src.bot.handlers.private.shop.keyboard import kb_shop
 from src.database.models import User
 from src.database.repositories import CheckRepository, UserRepository
 from src.service.errors import UserNotFound
 from src.service.logger import log_app, log_fin
 from src.service.receipt import send_check_file
 from src.service.sendmsg import send_msg
-from src.service.vault.goods import GOODS, Goods, rest_cost, rest_weeks
+from src.service.vault.goods import GOODS, Goods, get_goods, rest_cost, rest_weeks
 from src.service.vault.texts import (
     ERR_NO_MONEY,
     REST_ASK_DATE,
     REST_BAD_DATE,
     REST_PAST_DATE,
+    SHOP_TITLE,
     txt_no_money,
     txt_rest_ok,
 )
@@ -98,3 +100,4 @@ async def msg_rest_date(message: Message, user: User, users: UserRepository, che
     )
     await send_msg(message, txt_rest_ok(raw, weeks, cost, balance))
     await send_check_file(message, check)
+    await send_msg(message, SHOP_TITLE, reply_markup=kb_shop(get_goods(), 0))

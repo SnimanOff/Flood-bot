@@ -42,8 +42,6 @@ services:
       - "443:443/udp"
     env_file:
       - ../.env
-    environment:
-      DOMAIN: ${DOMAIN:-localhost}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data

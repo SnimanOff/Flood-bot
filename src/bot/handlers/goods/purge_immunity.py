@@ -1,14 +1,15 @@
 from aiogram import F, Router
 from aiogram.types import CallbackQuery
 
+from src.bot.handlers.private.shop.keyboard import kb_shop
 from src.database.models import User
 from src.database.repositories import CheckRepository, UserRepository
 from src.service.errors import UserNotFound
 from src.service.logger import log_app, log_fin
 from src.service.receipt import send_check_file
 from src.service.sendmsg import send_msg
-from src.service.vault.goods import GOODS, Goods
-from src.service.vault.texts import ERR_NO_MONEY, txt_purge_ok
+from src.service.vault.goods import GOODS, Goods, get_goods
+from src.service.vault.texts import ERR_NO_MONEY, SHOP_TITLE, txt_purge_ok
 
 router = Router(name="purge_immunity")
 
@@ -52,7 +53,8 @@ async def clbck_shop_buy_purge(callback: CallbackQuery, user: User, users: UserR
         qty=1,
         meta={"inventory_total": qty},
     )
-    await send_msg(callback.message, txt_purge_ok(good["title"], cost, updated.balance, qty), edit=True)
+    await send_msg(callback.message, txt_purge_ok(good["title"], cost, updated.balance, qty))
     await send_check_file(callback.message, check)
+    await send_msg(callback.message, SHOP_TITLE, reply_markup=kb_shop(get_goods(), 0), edit=True)
     await callback.answer()
     log_app.info("purge bought tg_id={} cost={}", user.tg_id, cost)
