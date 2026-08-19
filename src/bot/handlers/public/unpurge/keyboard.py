@@ -1,17 +1,13 @@
-﻿import math
+import math
 
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from src.service.vault.buttons import BTN_BACK, BTN_NEXT, BTN_UNPURGE_LIST
+from src.service.vault.buttons import BTN_BACK, BTN_NEXT
 from src.service.vault.texts import txt_unpurge_btn
 
 
 PER_PAGE = 4
-
-
-def kb_unpurge_switch() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text=BTN_UNPURGE_LIST, switch_inline_query_current_chat="unpurge", style="primary")]])
 
 
 def kb_unpurge(holders: list, page: int = 0) -> InlineKeyboardMarkup:

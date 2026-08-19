@@ -3,7 +3,6 @@ ERR_NO_RIGHTS = "Недостаточно прав"
 ERR_NO_MONEY = "Недостаточно средств"
 ERR_ALREADY = "Уже обработано"
 ERR_USER_NOT_FOUND = "Пользователь не найден"
-INLINE_HINT = "Нажми кнопку - откроется без прав админа у бота"
 
 
 def txt_no_money(needed: int, balance: int) -> str:
