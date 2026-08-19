@@ -45,6 +45,7 @@ def txt_help_body() -> str:
         f"<b>Группа / inline</b> (без админ-прав бота)\n"
         f"@bot rests — активные ресты\n"
         f"@bot unpurge — снять пощаду (OWNER+)\n"
+        f"@bot setrest id|@user ДД.ММ.ГГГГ — рест (OWNER+)\n"
         f"@bot help — эта справка\n"
         f"\n"
         f"<b>Команды</b>\n"
@@ -225,6 +226,45 @@ def txt_my_items(inv_block: str, rest_block: str) -> str:
         f"\n"
         f"<b>Рест</b>\n{rest_block}"
     )
+
+# ---------------- setrest ----------------
+SETREST_INLINE_TITLE = "Установить рест"
+SETREST_USAGE = "setrest &lt;id|@user&gt; ДД.ММ.ГГГГ"
+SETREST_BAD_DATE = "Формат даты: ДД.ММ.ГГГГ"
+SETREST_PAST = "Дата не может быть в прошлом"
+SETREST_USER_NOT_FOUND = "Пользователь не найден"
+SETREST_CANCELLED = "Отменено"
+SETREST_DONE = "Рест установлен"
+
+
+def txt_setrest_preview(tg_id: int, username: str | None, until_str: str) -> str:
+    from html import escape
+    if username:
+        who = f"@{escape(username)}"
+    else:
+        who = f"<code>{tg_id}</code>"
+    return (
+        f"<b>Установить рест</b>\n"
+        f"\n"
+        f"Кому: {who}\n"
+        f"ID: <code>{tg_id}</code>\n"
+        f"До: <b>{until_str}</b>"
+    )
+
+
+def txt_setrest_ok(tg_id: int, username: str | None, until_str: str) -> str:
+    from html import escape
+    if username:
+        who = f"@{escape(username)}"
+    else:
+        who = f"<code>{tg_id}</code>"
+    return (
+        f"{SETREST_DONE}\n"
+        f"Кому: {who}\n"
+        f"ID: <code>{tg_id}</code>\n"
+        f"До: <b>{until_str}</b>"
+    )
+
 
 # ---------------- roles ----------------
 SETROLE_USAGE = "Использование:\n/setrole <id|@user> <role>\nили reply: /setrole <role>\nРоли: user, moderator, admin, owner, root"
