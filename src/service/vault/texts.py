@@ -53,14 +53,6 @@ def txt_help_body() -> str:
         f"<b>рут</b>\n"
         f"/setrole id роль - user/moderator/admin/owner/root\n"
         f"  /setrole 123456 owner\n"
-        f"\n"
-        f"<b>Личка</b>\n"
-        f"Магазин, пополнить, инвентарь - после /start\n"
-        f"\n"
-        f"<b>Группа</b>\n"
-        f"Пиши команды: /gm /setrest /unpurge /rmrest /setrole\n"
-        f"Ответ виден только тебе\n"
-        f"/rests - список рестов"
     )
 
 
