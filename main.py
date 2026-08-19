@@ -1,4 +1,4 @@
-﻿import asyncio
+import asyncio
 
 from src.bot.main import start_bot
 from src.database.core import close_db, init_db
@@ -7,7 +7,7 @@ from src.service.vault.version import refresh_version
 
 
 async def main() -> None:
-    await refresh_version()
+    await refresh_version(force=True)
     try:
         await start_bot()
     except Exception:

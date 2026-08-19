@@ -62,9 +62,9 @@ def fmt_cd(left: timedelta) -> str:
 
 async def edit_message_content(callback_message, text, reply_markup=None):
     if callback_message.photo:
-        await callback_message.edit_caption(caption=text, reply_markup=reply_markup)
+        await callback_message.edit_caption(caption=text, parse_mode="HTML", reply_markup=reply_markup)
     else:
-        await callback_message.edit_text(text=text, reply_markup=reply_markup)
+        await callback_message.edit_text(text=text, parse_mode="HTML", reply_markup=reply_markup)
 
 
 async def update_admin_messages(bot: Bot, request: MoneyRequest, status_line: str):
@@ -194,7 +194,7 @@ async def msg_balance_proof(message: Message, user: User, users: UserRepository,
     await money_requests.set_notifies(req.id, notifies)
 
     log_app.info("balance request submitted tg_id={} request_id={} amount={}", tg_id, req.id, amount)
-    version, updated = get_version_info()
+    version, updated = await get_version_info()
     name = message.from_user.first_name or "друг"
     menu = txt_start_hello(name, version, updated)
     text = f"{BALANCE_SENT}\n\n{menu}"

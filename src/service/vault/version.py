@@ -1,15 +1,17 @@
-﻿"""Version info from GitHub releases/tags (fetched once at startup)."""
+"""Version info from GitHub releases/tags (TTL cache)."""
 from __future__ import annotations
 import asyncio
 from datetime import datetime, timezone
 from typing import Any
 
 import aiohttp
+from packaging.version import InvalidVersion, Version
 
 from src.service.logger import log_tech
 from src.service.settings import settings
 
 FALLBACK_VERSION = "0.0.0"
+CACHE_TTL = 60
 
 _lock = asyncio.Lock()
 
@@ -54,20 +56,51 @@ def _strip_v(tag: str) -> str:
     return t or FALLBACK_VERSION
 
 
+def _tag_key(name: str):
+    s = _strip_v(name)
+    try:
+        return (0, Version(s))
+    except InvalidVersion:
+        return (1, s)
+
+
 def _parse_dt(s: str | None) -> datetime | None:
     if not s:
         return None
     return datetime.fromisoformat(s.replace("Z", "+00:00"))
 
 
+async def _commit_date(session: aiohttp.ClientSession, base: str, sha: str) -> datetime | None:
+    async with session.get(f"{base}/commits/{sha}") as cresp:
+        if cresp.status != 200:
+            return None
+        cdata = await cresp.json()
+        return _parse_dt(
+            (cdata.get("commit") or {}).get("committer", {}).get("date")
+        )
+
+
+async def _branch_date(session: aiohttp.ClientSession, base: str) -> datetime | None:
+    branch = settings.github_branch or "main"
+    async with session.get(f"{base}/commits/{branch}") as resp:
+        if resp.status != 200:
+            log_tech.warning("github commits status={}", resp.status)
+            return None
+        data = await resp.json()
+        return _parse_dt(
+            (data.get("commit") or {}).get("committer", {}).get("date")
+        )
+
+
 async def _fetch_github() -> tuple[str, datetime | None] | None:
-    """Return (version, when) from releases → tags → commits date only."""
+    """releases/latest → releases list → best tag by semver → branch date fallback."""
     repo = (settings.github_repo or "").strip()
     if not repo or "/" not in repo:
         return None
     base = f"https://api.github.com/repos/{repo}"
     timeout = aiohttp.ClientTimeout(total=8)
     async with aiohttp.ClientSession(timeout=timeout, headers=_headers()) as session:
+        # 1. Formal latest release
         async with session.get(f"{base}/releases/latest") as resp:
             if resp.status == 200:
                 data = await resp.json()
@@ -76,39 +109,48 @@ async def _fetch_github() -> tuple[str, datetime | None] | None:
                 if tag:
                     return _strip_v(tag), when
 
-        async with session.get(f"{base}/tags", params={"per_page": 1}) as resp:
+        # 2. First non-draft release
+        async with session.get(f"{base}/releases", params={"per_page": 20}) as resp:
+            if resp.status == 200:
+                releases = await resp.json()
+                if isinstance(releases, list):
+                    for rel in releases:
+                        if rel.get("draft"):
+                            continue
+                        tag = rel.get("tag_name") or ""
+                        if not tag:
+                            continue
+                        when = _parse_dt(rel.get("published_at") or rel.get("created_at"))
+                        return _strip_v(tag), when
+
+        # 3. Best tag by packaging.version
+        version = FALLBACK_VERSION
+        when: datetime | None = None
+        async with session.get(f"{base}/tags", params={"per_page": 100}) as resp:
             if resp.status == 200:
                 tags = await resp.json()
                 if isinstance(tags, list) and tags:
-                    tag = tags[0].get("name") or ""
-                    when: datetime | None = None
-                    sha = (tags[0].get("commit") or {}).get("sha")
-                    if sha:
-                        async with session.get(f"{base}/commits/{sha}") as cresp:
-                            if cresp.status == 200:
-                                cdata = await cresp.json()
-                                when = _parse_dt(
-                                    (cdata.get("commit") or {})
-                                    .get("committer", {})
-                                    .get("date")
-                                )
-                    if tag:
-                        return _strip_v(tag), when
+                    best = max(tags, key=lambda t: _tag_key(t.get("name") or ""))
+                    tag_name = best.get("name") or ""
+                    if tag_name:
+                        version = _strip_v(tag_name)
+                        sha = (best.get("commit") or {}).get("sha")
+                        if sha:
+                            when = await _commit_date(session, base, sha)
 
-        branch = settings.github_branch or "main"
-        async with session.get(f"{base}/commits/{branch}") as resp:
-            if resp.status != 200:
-                log_tech.warning("github commits status={}", resp.status)
-                return None
-            data = await resp.json()
-            when = _parse_dt(
-                (data.get("commit") or {}).get("committer", {}).get("date")
-            )
-            return FALLBACK_VERSION, when
+        # 4. commits/{branch} only for updated_at if tag has no date
+        if when is None:
+            when = await _branch_date(session, base)
+
+        return version, when
 
 
-async def refresh_version() -> None:
+async def refresh_version(force: bool = False) -> None:
     async with _lock:
+        if not force and _cache["fetched_at"] is not None:
+            age = (datetime.now(timezone.utc) - _cache["fetched_at"]).total_seconds()
+            if age < CACHE_TTL:
+                return
         try:
             result = await _fetch_github()
             if result is not None:
@@ -130,7 +172,8 @@ async def refresh_version() -> None:
         _cache["fetched_at"] = datetime.now(timezone.utc)
 
 
-def get_version_info() -> tuple[str, str]:
+async def get_version_info() -> tuple[str, str]:
+    await refresh_version(force=False)
     return str(_cache["version"]), format_ago(_cache.get("updated_at"))
 
 

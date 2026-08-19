@@ -1,4 +1,4 @@
-﻿from aiogram import Router, F
+from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 
@@ -16,21 +16,17 @@ router = Router(name="start")
 @router.message(Command("start"), F.chat.type == "private")
 async def cmd_start(message: Message, user: User) -> None:
     log_app.info("/start tg_id={}", message.from_user.id)
-    version, updated = get_version_info()
-    name = message.from_user.first_name or "РґСЂСѓРі"
+    version, updated = await get_version_info()
+    name = message.from_user.first_name or "друг"
     text = txt_start_hello(name, version, updated)
     await send_msg(message=message, text=text, media=START_MEDIA, reply_markup=kb_start())
+
 
 @router.callback_query(F.data == "start_menu", F.message.chat.type == "private")
 async def clbck_start_menu(callback: CallbackQuery, user: User) -> None:
     log_app.info("start_menu tg_id={}", callback.from_user.id)
-    version, updated = get_version_info()
-    name = callback.from_user.first_name or "РґСЂСѓРі"
+    version, updated = await get_version_info()
+    name = callback.from_user.first_name or "друг"
     text = txt_start_hello(name, version, updated)
-
-    if callback.message.photo:
-        await callback.message.edit_caption(caption=text, reply_markup=kb_start())
-    else:
-        await callback.message.edit_text(text=text, reply_markup=kb_start())
-
+    await send_msg(callback.message, text, media=START_MEDIA, reply_markup=kb_start(), edit=True)
     await callback.answer()
