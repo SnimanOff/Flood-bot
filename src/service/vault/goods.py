@@ -36,16 +36,21 @@ def get_good(good_id: str) -> dict | None:
     return GOODS.get(good_id)
 
 
-def rest_weeks(until: date) -> int:
+def rest_start_date(current_rest: date | None = None) -> date:
     today = datetime.now(timezone.utc).date()
-    days = (until - today).days
-    if days < 0:
+    if current_rest is not None and current_rest >= today:
+        return current_rest
+    return today
+
+
+def rest_weeks(until: date, current_rest: date | None = None) -> int:
+    start = rest_start_date(current_rest)
+    days = (until - start).days
+    if days <= 0:
         return 0
-    if days == 0:
-        return 1
     return max(1, math.ceil(days / 7))
 
 
-def rest_cost(until: date) -> int:
-    weeks = rest_weeks(until)
+def rest_cost(until: date, current_rest: date | None = None) -> int:
+    weeks = rest_weeks(until, current_rest)
     return int(weeks * int(GOODS[Goods.REST]["price"]))

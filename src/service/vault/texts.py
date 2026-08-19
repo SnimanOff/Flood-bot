@@ -1,4 +1,4 @@
-﻿# ---------------- common ----------------
+# ---------------- common ----------------
 ERR_NO_RIGHTS = "Недостаточно прав"
 ERR_NO_MONEY = "Недостаточно средств"
 ERR_ALREADY = "Уже обработано"
@@ -15,9 +15,11 @@ def txt_page(cur, total) -> str:
 
 
 # ---------------- start ----------------
-def txt_start_hello(name: str, version: str, updated: str) -> str:
+def txt_start_hello(name: str, version: str, updated: str, balance: int) -> str:
     return (
         f"Привет, {name}!\n"
+        f"\n"
+        f"Баланс: <b>{balance}</b>\n"
         f"\n"
         f"Версия: <code>v{version}</code>\n"
         f"Последнее обновление: {updated}"
@@ -133,6 +135,19 @@ def txt_gm_ok(sign, amount, tg_id, balance) -> str:
 REST_ASK_DATE = "Введите дату окончания реста (ДД.ММ.ГГГГ):"
 REST_BAD_DATE = "Формат: ДД.ММ.ГГГГ"
 REST_PAST_DATE = "Дата не может быть в прошлом"
+REST_NO_EXTEND = "Дата не позже текущего реста"
+REST_CANCELLED = "Покупка отменена"
+
+
+def txt_rest_confirm(until_str: str, weeks: int, cost: int, balance: int, current_rest_str: str | None) -> str:
+    lines = ['<b>Подтверждение покупки реста</b>', ""]
+    if current_rest_str:
+        lines.append(f"Сейчас до: <b>{current_rest_str}</b>")
+    lines.append(f"Новая дата: <b>{until_str}</b>")
+    lines.append(f"Доплата недель: <b>{weeks}</b>")
+    lines.append(f"К оплате: <b>{cost}</b>")
+    lines.append(f"Баланс: <b>{balance}</b>")
+    return "\n".join(lines)
 
 
 def txt_rest_ok(date_str: str, weeks: int, cost: int, balance: int) -> str:

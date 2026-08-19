@@ -18,7 +18,7 @@ async def cmd_start(message: Message, user: User) -> None:
     log_app.info("/start tg_id={}", message.from_user.id)
     version, updated = await get_version_info()
     name = message.from_user.first_name or "друг"
-    text = txt_start_hello(name, version, updated)
+    text = txt_start_hello(name, version, updated, user.balance)
     await send_msg(message=message, text=text, media=START_MEDIA, reply_markup=kb_start())
 
 
@@ -27,6 +27,6 @@ async def clbck_start_menu(callback: CallbackQuery, user: User) -> None:
     log_app.info("start_menu tg_id={}", callback.from_user.id)
     version, updated = await get_version_info()
     name = callback.from_user.first_name or "друг"
-    text = txt_start_hello(name, version, updated)
+    text = txt_start_hello(name, version, updated, user.balance)
     await send_msg(callback.message, text, media=START_MEDIA, reply_markup=kb_start(), edit=True)
     await callback.answer()

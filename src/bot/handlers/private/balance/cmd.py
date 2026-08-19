@@ -196,7 +196,7 @@ async def msg_balance_proof(message: Message, user: User, users: UserRepository,
     log_app.info("balance request submitted tg_id={} request_id={} amount={}", tg_id, req.id, amount)
     version, updated = await get_version_info()
     name = message.from_user.first_name or "друг"
-    menu = txt_start_hello(name, version, updated)
+    menu = txt_start_hello(name, version, updated, user.balance)
     text = f"{BALANCE_SENT}\n\n{menu}"
     await send_msg(message, text, media=START_MEDIA or BALANCE_SENT_MEDIA, reply_markup=kb_start())
 
