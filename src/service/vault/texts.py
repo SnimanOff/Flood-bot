@@ -46,7 +46,7 @@ def txt_help_body() -> str:
         f"@bot rests — активные ресты\n"
         f"@bot unpurge — снять пощаду (OWNER+)\n"
         f"@bot setrest id|username ДД.ММ.ГГГГ — рест (OWNER+), username БЕЗ @\n"
-        f"/setrest <id|username> ДД.ММ.ГГГГ — то же (OWNER+)\n"
+        f"/setrest &lt;id|username&gt; ДД.ММ.ГГГГ — то же (OWNER+)\n"
         f"@bot help — эта справка\n"
         f"\n"
         f"<b>Команды</b>\n"
